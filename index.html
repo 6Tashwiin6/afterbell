@@ -1,1193 +1,1230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="AfterBell — a student mood, advice, and squad chat hub.">
-  <title>AfterBell: Student Mood &amp; Squad Hub</title>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0f172a;
-      --card: #1e293b;
-      --card2: #263449;
-      --border: #334155;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --purple: #a78bfa;
-      --blue: #60a5fa;
-      --green: #4ade80;
-      --red: #fb7185;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
-      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    button, input, textarea { font: inherit; }
-    button { cursor: pointer; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible {
-      outline: 2px solid var(--blue); outline-offset: 3px;
-    }
-    .hidden { display: none !important; }
-    .gradient {
-      background: linear-gradient(110deg, #a78bfa, #60a5fa);
-      color: #0b1120; border: 0; font-weight: 800;
-    }
-    .btn {
-      border: 1px solid var(--border); border-radius: 11px; padding: 10px 14px;
-      color: var(--text); background: var(--card2); transition: opacity .15s;
-    }
-    .btn:hover { opacity: .85; }
-    .btn:disabled { opacity: .45; cursor: not-allowed; }
-    .btn.gradient { background: linear-gradient(110deg, #a78bfa, #60a5fa); color: #0b1120; }
-    .btn.green { background: #14532d; border-color: #166534; color: #bbf7d0; }
-    .btn.red { background: #4c1725; border-color: #9f1239; color: #fecdd3; }
-    input, textarea {
-      width: 100%; border: 1px solid var(--border); border-radius: 11px;
-      padding: 12px; color: var(--text); background: #111c30;
-    }
-    textarea { resize: vertical; min-height: 100px; }
-    .muted { color: var(--muted); }
-    .small { font-size: 12px; }
-    .wrap { max-width: 1060px; width: calc(100% - 28px); margin: auto; }
-    .topbar {
-      position: sticky; top: 0; z-index: 5; background: #0f172af2;
-      backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
-    }
-    .top-inner {
-      max-width: 1060px; width: calc(100% - 28px); margin: auto;
-      min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    }
-    .brand { font-size: 21px; font-weight: 900; letter-spacing: -.7px; }
-    .brand span { color: var(--purple); }
-    .status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
-    .dot { height: 9px; width: 9px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
-    .dot.online { background: var(--green); box-shadow: 0 0 12px #4ade8066; }
-    .dot.error { background: var(--red); }
-    main { padding: 28px 0 50px; }
-    .welcome {
-      max-width: 500px; margin: 7vh auto; padding: 28px;
-      border: 1px solid var(--border); border-radius: 22px;
-      background: radial-gradient(ellipse at top right, #4c1d9540, transparent 60%), var(--card);
-    }
-    h1, h2, h3, p { margin-top: 0; }
-    h1 { font-size: clamp(28px, 5vw, 43px); line-height: 1.15; letter-spacing: -1px; }
-    h2 { font-size: 21px; }
-    h3 { font-size: 16px; }
-    .brand-icon {
-      display: grid; place-items: center; width: 49px; height: 49px; border-radius: 15px;
-      background: linear-gradient(135deg, #a78bfa, #60a5fa); color: #0f172a;
-      font-size: 25px; margin-bottom: 20px;
-    }
-    .stack { display: grid; gap: 12px; }
-    .row { display: flex; align-items: center; gap: 9px; }
-    .row > input { min-width: 0; }
-    .row .btn { flex-shrink: 0; }
-    .card {
-      padding: 20px; border: 1px solid var(--border); border-radius: 17px;
-      background: var(--card); min-width: 0;
-    }
-    .grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 16px; }
-    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
-    .section-title h2, .section-title h3 { margin: 0; }
-    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-    .pill {
-      border: 1px solid var(--border); background: #111c30; color: var(--text);
-      border-radius: 999px; padding: 8px 12px;
-    }
-    .pill.selected { border-color: var(--purple); background: #6d28d933; color: #ddd6fe; }
-    .advice {
-      padding: 14px; border-radius: 12px; border: 1px solid #8b5cf644;
-      background: #7c3aed14; margin-top: 12px;
-    }
-    .feed-item { padding: 12px 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
-    .feed-item:last-child { border-bottom: 0; }
-    .tabs { display: flex; gap: 8px; margin: 22px 0 16px; border-bottom: 1px solid var(--border); }
-    .tab {
-      position: relative; border: 0; border-bottom: 2px solid transparent;
-      color: var(--muted); background: transparent; padding: 12px 15px;
-    }
-    .tab.active { color: var(--text); border-bottom-color: var(--purple); }
-    .count {
-      display: inline-grid; place-items: center; min-width: 19px; height: 19px;
-      margin-left: 5px; border-radius: 99px; padding: 0 5px;
-      color: #0f172a; background: var(--purple); font-size: 11px; font-weight: 900;
-    }
-    .list { display: grid; gap: 10px; }
-    .list-item {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      border: 1px solid var(--border); border-radius: 12px; padding: 13px;
-      background: #111c30; min-width: 0;
-    }
-    .list-item > div:first-child { min-width: 0; overflow-wrap: anywhere; }
-    .actions { display: flex; flex-wrap: wrap; gap: 7px; }
-    .chat-layout { display: grid; grid-template-columns: minmax(175px, .7fr) minmax(0, 1.5fr); gap: 14px; }
-    .friend-choice { width: 100%; text-align: left; margin-bottom: 7px; overflow-wrap: anywhere; }
-    .friend-choice.active { border-color: var(--purple); background: #6d28d933; }
-    .chat-box {
-      display: flex; flex-direction: column; min-height: 360px; border: 1px solid var(--border);
-      border-radius: 14px; overflow: hidden; background: #111c30; min-width: 0;
-    }
-    .chat-head { padding: 13px; border-bottom: 1px solid var(--border); font-weight: 800; }
-    .messages { display: flex; flex-direction: column; gap: 10px; padding: 14px; flex: 1; min-height: 220px; max-height: 420px; overflow-y: auto; }
-    .bubble { max-width: 85%; padding: 10px 12px; border-radius: 13px; background: #263449; overflow-wrap: anywhere; align-self: flex-start; }
-    .bubble.mine { align-self: flex-end; background: #4c1d95; }
-    .bubble img { display: block; max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 5px; }
-    .composer { padding: 12px; border-top: 1px solid var(--border); display: grid; gap: 9px; }
-    .composer textarea { min-height: 64px; }
-    .empty { color: var(--muted); text-align: center; padding: 25px 10px; }
-    .notice {
-      border: 1px solid var(--border); background: #172338; padding: 12px 14px;
-      border-radius: 12px; margin-bottom: 14px; overflow-wrap: anywhere;
-    }
-    .notice.success { border-color: #166534; color: #bbf7d0; }
-    .notice.error { border-color: #9f1239; color: #fecdd3; }
-    .photo-preview { width: 100%; max-height: 240px; object-fit: contain; background: #111c30; border-radius: 12px; }
-    .footer { text-align: center; margin-top: 25px; font-size: 12px; color: var(--muted); }
-    @media (max-width: 700px) {
-      .grid, .chat-layout { grid-template-columns: 1fr; }
-      .top-inner { align-items: flex-start; padding: 12px 0; }
-      .brand { font-size: 19px; }
-      .status { max-width: 150px; }
-      .card { padding: 15px; }
-      .welcome { padding: 22px; }
-      .list-item { align-items: flex-start; flex-direction: column; }
-      .actions { width: 100%; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<title>AfterBell — Student Mood & Squad Hub</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#0f172a;--card:#1e293b;--card2:#263449;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--purple:#a78bfa;--blue:#60a5fa;--green:#4ade80;--red:#fb7185}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.btn{padding:10px 14px;border:1px solid var(--border);border-radius:11px;background:var(--card2);color:var(--text)}
+.btn:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.gradient{background:linear-gradient(110deg,#a78bfa,#60a5fa);color:#0f172a;border:0;font-weight:800}
+.btn.red{background:#4c1725;border-color:#9f1239;color:#fecdd3}
+.btn.green{background:#14532d;border-color:#166534;color:#bbf7d0}
+input,textarea{width:100%;min-width:0;background:#111c30;color:var(--text);border:1px solid var(--border);border-radius:11px;padding:12px}
+textarea{resize:vertical;min-height:95px}
+label{display:block;margin-bottom:5px}
+.wrap{max-width:1060px;width:calc(100% - 28px);margin:auto}
+header{position:sticky;top:0;z-index:10;background:#0f172af2;backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.top{max-width:1060px;width:calc(100% - 28px);margin:auto;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0}
+.brand{font-weight:900;font-size:22px;letter-spacing:-.7px;white-space:nowrap}
+.brand span{color:var(--purple)}
+.header-right{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
+.dot{width:9px;height:9px;flex-shrink:0;border-radius:50%;background:#64748b}
+.dot.online{background:var(--green);box-shadow:0 0 12px #4ade8066}
+.dot.error{background:var(--red)}
+main{padding:28px 0 45px}
+.card{min-width:0;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:17px}
+.welcome{max-width:470px;margin:6vh auto;padding:27px;background:radial-gradient(ellipse at top right,#4c1d9540,transparent 60%),var(--card);border:1px solid var(--border);border-radius:22px}
+.logo-icon{display:grid;place-items:center;width:49px;height:49px;border-radius:15px;background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#0f172a;font-size:25px;margin-bottom:20px}
+h1{font-size:clamp(29px,5vw,42px);line-height:1.15;letter-spacing:-1px;margin:0 0 15px}
+h2{font-size:21px;margin:0}
+h3{font-size:16px;margin:0 0 12px}
+p{margin-top:0}
+.stack{display:grid;gap:13px}
+.field{display:grid;gap:5px}
+.password-wrap{display:flex;gap:7px}
+.password-wrap input{flex:1}
+.password-wrap button{flex-shrink:0}
+.auth-toggle{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;background:#111c30;border-radius:12px}
+.auth-toggle button{padding:10px 6px;border:0;border-radius:9px;background:transparent;color:var(--muted)}
+.auth-toggle button.active{background:var(--card2);color:var(--text);font-weight:800}
+.error-text{color:#fda4af;font-size:13px}
+.notice{padding:12px 14px;margin-bottom:15px;border-radius:12px;background:#172338;border:1px solid var(--border);overflow-wrap:anywhere}
+.notice.success{border-color:#166534;color:#bbf7d0}
+.notice.error{border-color:#9f1239;color:#fecdd3}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.pill{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:#111c30;color:var(--text)}
+.pill.selected{border-color:var(--purple);background:#6d28d933;color:#ddd6fe}
+.advice{margin-top:13px;padding:14px;background:#7c3aed14;border:1px solid #8b5cf644;border-radius:12px}
+.feed-item{padding:12px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+.feed-item:last-child{border:0}
+.tabs{display:flex;gap:8px;margin:22px 0 16px;border-bottom:1px solid var(--border)}
+.tab{padding:12px 15px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted)}
+.tab.active{color:var(--text);border-bottom-color:var(--purple)}
+.count{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;margin-left:4px;border-radius:99px;background:var(--purple);color:#0f172a;font-size:11px;font-weight:900}
+.list{display:grid;gap:10px}
+.list-item{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:13px;border:1px solid var(--border);border-radius:12px;background:#111c30}
+.list-item>div:first-child{min-width:0;overflow-wrap:anywhere}
+.actions{display:flex;flex-wrap:wrap;gap:7px}
+.row{display:flex;align-items:center;gap:9px}
+.row>*{min-width:0}
+.row .btn{flex-shrink:0}
+.empty{text-align:center;color:var(--muted);padding:23px 10px}
+.chat-layout{display:grid;grid-template-columns:minmax(150px,.7fr) minmax(0,1.5fr);gap:14px}
+.friend-choice{width:100%;text-align:left;margin-bottom:7px;overflow-wrap:anywhere}
+.friend-choice.active{border-color:var(--purple);background:#6d28d933}
+.chat-box{display:flex;flex-direction:column;min-height:360px;min-width:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#111c30}
+.chat-head{padding:13px;border-bottom:1px solid var(--border);font-weight:800}
+.messages{display:flex;flex-direction:column;gap:10px;flex:1;min-height:220px;max-height:420px;overflow-y:auto;padding:14px}
+.bubble{align-self:flex-start;max-width:85%;padding:10px 12px;border-radius:13px;background:#263449;overflow-wrap:anywhere}
+.bubble.mine{align-self:flex-end;background:#4c1d95}
+.bubble img{display:block;max-width:100%;max-height:280px;border-radius:8px;margin-top:5px}
+.composer{display:grid;gap:9px;padding:12px;border-top:1px solid var(--border)}
+.composer textarea{min-height:64px}
+.photo-preview{width:100%;max-height:240px;object-fit:contain;background:#111c30;border-radius:12px}
+.footer{text-align:center;margin-top:24px;color:var(--muted);font-size:12px}
+@media(max-width:700px){
+ .top{align-items:flex-start}.header-right{gap:8px}.brand{font-size:19px}
+ .grid,.chat-layout{grid-template-columns:1fr}
+ .card{padding:15px}.welcome{padding:22px}
+ .list-item{align-items:flex-start;flex-direction:column}
+}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="top-inner">
-      <div class="brand">After<span>Bell</span> <span style="color:#94a3b8;font-size:12px;letter-spacing:0">STUDENT HUB</span></div>
-      <div class="status" aria-live="polite">
-        <span id="statusDot" class="dot"></span>
-        <span id="statusText">Offline · Enter your name</span>
-      </div>
+<header>
+ <div class="top">
+  <div class="brand">After<span>Bell</span></div>
+  <div class="header-right">
+   <div id="headerUser" class="hidden"><strong id="headerName"></strong></div>
+   <div class="status" aria-live="polite"><span id="statusDot" class="dot"></span><span id="statusText">Sign in to continue</span></div>
+   <button id="logoutBtn" class="btn red hidden" type="button">Log Out ↗</button>
+  </div>
+ </div>
+</header>
+
+<main class="wrap">
+ <section id="welcomeScreen" class="welcome">
+  <div class="logo-icon">✦</div>
+  <p class="muted small" style="font-weight:800;letter-spacing:2px">YOUR SPACE AFTER THE BELL</p>
+  <h1>School days are a lot.<br><span style="color:#a78bfa">You don't have to figure it all out alone.</span></h1>
+  <p class="muted">Check in with yourself, get advice, and connect with your squad.</p>
+
+  <div class="auth-toggle" style="margin:22px 0 17px">
+   <button id="loginTab" class="active" type="button">Log In</button>
+   <button id="signupTab" type="button">Create Account</button>
+  </div>
+
+  <form id="authForm" class="stack">
+   <div class="field">
+    <label for="authUsername">Username</label>
+    <input id="authUsername" maxlength="24" autocomplete="username" placeholder="e.g. Rook" required>
+    <span class="small muted">1–24 characters: letters, numbers, underscores.</span>
+   </div>
+   <div class="field">
+    <label for="authPassword">Password</label>
+    <div class="password-wrap">
+     <input id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="At least 8 characters" required>
+     <button id="togglePassword" class="btn" type="button" aria-label="Show password">👁</button>
     </div>
-  </header>
+   </div>
+   <div id="authError" class="error-text hidden" role="alert"></div>
+   <button id="authSubmit" class="btn gradient" type="submit">Log In →</button>
+  </form>
+  <p class="small muted" style="margin:15px 0 0">Accounts are stored on this device. This demo does not have a server to synchronize passwords or accounts between devices.</p>
+ </section>
 
-  <main class="wrap">
-    <section id="welcomeScreen" class="welcome">
-      <div class="brand-icon">✦</div>
-      <p class="muted" style="font-weight:800;text-transform:uppercase;letter-spacing:2px;font-size:11px">Your space after the bell</p>
-      <h1>School days are a lot.<br><span style="color:#a78bfa">You don't have to figure it all out alone.</span></h1>
-      <p class="muted">Check in with yourself, get a little advice, and connect with people you know.</p>
-      <form id="welcomeForm" class="stack">
-        <label for="nameInput">Choose your username</label>
-        <input id="nameInput" maxlength="24" autocomplete="nickname" placeholder="e.g. Rook" required>
-        <button class="btn gradient" type="submit">Enter AfterBell →</button>
-      </form>
-      <p class="small muted" style="margin:15px 0 0">Your username determines your public PeerJS ID. Use a nickname, not your full name or other personal details.</p>
+ <section id="appScreen" class="hidden">
+  <div id="globalNotice" class="notice hidden" role="status" aria-live="polite"></div>
+
+  <div class="section-title">
+   <div><p class="muted small" style="margin-bottom:4px">WELCOME BACK</p><h2>Hey, <span id="displayName"></span> ✨</h2></div>
+  </div>
+
+  <div class="grid">
+   <section class="card">
+    <div class="section-title"><h2>After-School Feelings &amp; Advice</h2><span>🌤️</span></div>
+    <p class="muted">How's your day actually going?</p>
+    <div id="moodPills" class="pills">
+     <button class="pill" data-mood="Happy" type="button">😊 Happy</button>
+     <button class="pill" data-mood="Okay" type="button">🙂 Okay</button>
+     <button class="pill" data-mood="Tired" type="button">😴 Tired</button>
+     <button class="pill" data-mood="Stressed" type="button">😵 Stressed</button>
+     <button class="pill" data-mood="Sad" type="button">🌧️ Sad</button>
+     <button class="pill" data-mood="Excited" type="button">⚡ Excited</button>
+    </div>
+    <label for="ventBox">Want to get something off your chest?</label>
+    <textarea id="ventBox" maxlength="1200" placeholder="Write it out. You don't have to make it sound perfect..."></textarea>
+    <div class="row" style="justify-content:space-between;flex-wrap:wrap;margin-top:12px">
+     <span class="small muted">Your check-in stays on this device.</span>
+     <button id="adviceBtn" class="btn gradient" type="button">Get advice ✨</button>
+    </div>
+    <div id="adviceBox" class="advice hidden" aria-live="polite"></div>
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+     <h3>Daily Vibe Feed</h3>
+     <p class="small muted">Your own recent check-ins. Nothing is posted publicly automatically.</p>
+     <div id="vibeFeed"><div class="empty">Your first vibe starts here.</div></div>
+    </div>
+   </section>
+
+   <div class="stack">
+    <section class="card">
+     <div class="section-title"><h2>Optional Classroom Snap</h2><span>📸</span></div>
+     <p class="muted small">Take a picture or upload one. Images are compressed to a maximum 350px JPEG before chat sharing.</p>
+     <div class="stack">
+      <label for="photoFile">Choose an image</label>
+      <input id="photoFile" type="file" accept="image/*">
+      <button id="cameraBtn" class="btn" type="button">Open camera</button>
+      <video id="cameraVideo" class="photo-preview hidden" autoplay playsinline muted></video>
+      <div class="row"><button id="captureBtn" class="btn hidden" type="button">Capture</button><button id="stopCameraBtn" class="btn hidden" type="button">Close camera</button></div>
+      <canvas id="photoCanvas" class="hidden"></canvas>
+      <img id="photoPreview" class="photo-preview hidden" alt="Compressed photo preview">
+      <p id="photoInfo" class="small muted"></p>
+      <button id="clearPhotoBtn" class="btn hidden" type="button">Remove photo</button>
+     </div>
     </section>
-
-    <section id="appScreen" class="hidden">
-      <div id="globalNotice" class="notice hidden" role="status" aria-live="polite"></div>
-      <div class="section-title">
-        <div>
-          <p class="muted small" style="margin-bottom:4px">WELCOME BACK</p>
-          <h2 style="margin:0">Hey, <span id="displayName"></span> ✨</h2>
-        </div>
-        <button id="changeNameBtn" class="btn" type="button">Change name</button>
-      </div>
-
-      <div class="grid">
-        <section class="card">
-          <div class="section-title"><h2>After-School Feelings &amp; Advice</h2><span>🌤️</span></div>
-          <p class="muted">How's your day actually going?</p>
-          <div id="moodPills" class="pill-row">
-            <button class="pill" data-mood="Happy" type="button">😊 Happy</button>
-            <button class="pill" data-mood="Okay" type="button">🙂 Okay</button>
-            <button class="pill" data-mood="Tired" type="button">😴 Tired</button>
-            <button class="pill" data-mood="Stressed" type="button">😵 Stressed</button>
-            <button class="pill" data-mood="Sad" type="button">🌧️ Sad</button>
-            <button class="pill" data-mood="Excited" type="button">⚡ Excited</button>
-          </div>
-          <label for="ventBox">Want to get something off your chest?</label>
-          <textarea id="ventBox" maxlength="1200" placeholder="Write it out. You don't have to make it sound perfect..."></textarea>
-          <div class="row" style="justify-content:space-between;margin-top:12px;flex-wrap:wrap">
-            <span class="small muted">Private on this device until you share it.</span>
-            <button id="adviceBtn" class="btn gradient" type="button">Get advice ✨</button>
-          </div>
-          <div id="adviceBox" class="advice hidden" aria-live="polite"></div>
-          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
-            <h3>Daily Vibe Feed</h3>
-            <p class="small muted">Only your own check-ins appear here. Nothing is posted publicly automatically.</p>
-            <div id="vibeFeed"><div class="empty">Your first vibe starts here.</div></div>
-          </div>
-        </section>
-
-        <div class="stack">
-          <section class="card">
-            <div class="section-title"><h2>Optional Classroom Snap</h2><span>📸</span></div>
-            <p class="muted small">Capture a moment or choose a photo. Images are resized to a maximum 350px JPEG before sending.</p>
-            <div class="stack">
-              <label for="photoFile">Choose an image</label>
-              <input id="photoFile" type="file" accept="image/*">
-              <button id="cameraBtn" class="btn" type="button">Open camera</button>
-              <video id="cameraVideo" class="photo-preview hidden" autoplay playsinline muted></video>
-              <div class="row">
-                <button id="captureBtn" class="btn hidden" type="button">Capture photo</button>
-                <button id="stopCameraBtn" class="btn hidden" type="button">Close camera</button>
-              </div>
-              <canvas id="photoCanvas" class="hidden"></canvas>
-              <img id="photoPreview" class="photo-preview hidden" alt="Compressed photo preview">
-              <p id="photoInfo" class="small muted"></p>
-              <button id="clearPhotoBtn" class="btn hidden" type="button">Remove photo</button>
-            </div>
-          </section>
-          <section class="card">
-            <div class="section-title"><h2>Connection details</h2><span>🔗</span></div>
-            <p class="small muted">Share your username with a friend so they can send you a request.</p>
-            <div class="small muted">Your Peer ID</div>
-            <p id="peerIdLabel" style="overflow-wrap:anywhere;font-weight:700">Connecting…</p>
-            <button id="copyIdBtn" class="btn" type="button">Copy Peer ID</button>
-            <p class="small muted" style="margin:12px 0 0">Both devices need internet access, this page open, and access to the PeerJS signaling service. Use HTTPS or localhost.</p>
-          </section>
-        </div>
-      </div>
-
-      <nav class="tabs" aria-label="Squad and chat tabs">
-        <button class="tab active" data-tab="squad" type="button">Squad <span id="requestBadge" class="count hidden">0</span></button>
-        <button class="tab" data-tab="chat" type="button">Chat <span id="chatBadge" class="count hidden">0</span></button>
-      </nav>
-
-      <section id="squadTab" class="card">
-        <div class="section-title"><h2>Your Squad</h2><span>👥</span></div>
-        <form id="addFriendForm" class="row" style="margin-bottom:18px">
-          <input id="friendNameInput" maxlength="24" placeholder="Friend's exact username" autocomplete="off" required>
-          <button class="btn gradient" type="submit">Send</button>
-        </form>
-        <p class="small muted">Requests are delivered directly to the recipient's currently open PeerJS connection. A username must be unique to one person.</p>
-        <h3 style="margin-top:22px">Friend requests <span id="requestCount" class="muted"></span></h3>
-        <div id="requestList" class="list"><div class="empty">No friend requests yet.</div></div>
-        <h3 style="margin-top:22px">Squad members</h3>
-        <div id="squadList" class="list"><div class="empty">Your squad is waiting for friends.</div></div>
-        <h3 style="margin-top:22px">Notifications</h3>
-        <div id="notificationList" class="list"><div class="empty">You're all caught up.</div></div>
-      </section>
-
-      <section id="chatTab" class="card hidden">
-        <div class="section-title"><h2>1-on-1 Chat</h2><span>💬</span></div>
-        <p class="small muted">Messages and photos are sent over the direct PeerJS data connection. A disconnected friend must reconnect before offline messages can be delivered.</p>
-        <div class="chat-layout">
-          <div>
-            <h3>Your Squad</h3>
-            <div id="chatFriendList"><div class="empty">Accept a friend request to start chatting.</div></div>
-          </div>
-          <div class="chat-box">
-            <div id="chatHeader" class="chat-head">Choose a squad member</div>
-            <div id="messageList" class="messages"><div class="empty">Your conversation will appear here.</div></div>
-            <div class="composer">
-              <textarea id="messageInput" maxlength="3000" placeholder="Write a message…" disabled></textarea>
-              <div class="row">
-                <label class="btn" for="chatPhotoInput" style="display:inline-block;cursor:pointer">Attach photo</label>
-                <input id="chatPhotoInput" class="hidden" type="file" accept="image/*">
-                <button id="sendMessageBtn" class="btn gradient" type="button" disabled>Send ↗</button>
-              </div>
-              <p id="chatStatus" class="small muted" style="margin:0">Choose a friend to begin.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <p class="footer">AfterBell · Be kind to yourself and your squad. Never share passwords, private school details, or photos without permission.</p>
+    <section class="card">
+     <div class="section-title"><h2>Connection details</h2><span>🔗</span></div>
+     <p class="small muted">Share your username with a friend so they can find your PeerJS ID.</p>
+     <div class="small muted">Your Peer ID</div>
+     <p id="peerIdLabel" style="overflow-wrap:anywhere;font-weight:700">Not connected</p>
+     <button id="copyIdBtn" class="btn" type="button">Copy Peer ID</button>
+     <p class="small muted" style="margin:12px 0 0">Keep this page open on both devices. HTTPS is required for camera access.</p>
     </section>
-  </main>
+   </div>
+  </div>
 
-  <script>
-    "use strict";
+  <nav class="tabs" aria-label="Squad and chat tabs">
+   <button class="tab active" data-tab="squad" type="button">Squad <span id="requestBadge" class="count hidden">0</span></button>
+   <button class="tab" data-tab="chat" type="button">Chat <span id="chatBadge" class="count hidden">0</span></button>
+  </nav>
 
-    /*
-      PeerJS implementation notes:
-      - Deterministic IDs allow a known username to be dialled directly.
-      - Peer IDs are public identifiers, NOT authentication.
-      - Public PeerJS signaling and public STUN servers cannot guarantee
-        100% availability, privacy, or connectivity through every firewall.
-      - The recipient must have the page open and PeerJS connected.
-      - LocalStorage is per browser/device; friend lists are synchronized
-        by messages, not shared storage.
-      - For a real deployment, add server-side identity verification,
-        rate limits, moderation, and a trusted signaling/relay service.
-    */
+  <section id="squadTab" class="card">
+   <div class="section-title"><h2>Your Squad</h2><span>👥</span></div>
+   <form id="addFriendForm" class="row" style="margin-bottom:14px">
+    <input id="friendNameInput" maxlength="24" placeholder="Friend's exact username" required>
+    <button class="btn gradient" type="submit">Send</button>
+   </form>
+   <p class="small muted">Both users must be online. PeerJS IDs are public and this demo does not provide server-side identity verification.</p>
+   <h3 style="margin-top:22px">Friend requests <span id="requestCount" class="muted"></span></h3>
+   <div id="requestList" class="list"><div class="empty">No friend requests yet.</div></div>
+   <h3 style="margin-top:22px">Squad members</h3>
+   <div id="squadList" class="list"><div class="empty">Your squad is waiting for friends.</div></div>
+   <h3 style="margin-top:22px">Notifications</h3>
+   <div id="notificationList" class="list"><div class="empty">You're all caught up.</div></div>
+  </section>
 
-    const PREFIX = "afterbell_pg_";
-    const DB_KEY = "afterbell_state_v1";
-    const MAX_IMAGE_SIDE = 350;
-    const MAX_IMAGE_BYTES = 180000;
-    const MAX_HISTORY = 100;
-    const MAX_NOTIFICATIONS = 60;
+  <section id="chatTab" class="card hidden">
+   <div class="section-title"><h2>1-on-1 Chat</h2><span>💬</span></div>
+   <p class="small muted">Text and compressed photos travel through a direct PeerJS data connection. Offline messages are not delivered.</p>
+   <div class="chat-layout">
+    <div><h3>Your Squad</h3><div id="chatFriendList"><div class="empty">Accept a friend request to start chatting.</div></div></div>
+    <div class="chat-box">
+     <div id="chatHeader" class="chat-head">Choose a squad member</div>
+     <div id="messageList" class="messages"><div class="empty">Your conversation will appear here.</div></div>
+     <div class="composer">
+      <textarea id="messageInput" maxlength="3000" placeholder="Write a message…" disabled></textarea>
+      <div class="row">
+       <label class="btn" for="chatPhotoInput" style="cursor:pointer;margin:0">Attach photo</label>
+       <input id="chatPhotoInput" class="hidden" type="file" accept="image/*" disabled>
+       <button id="sendMessageBtn" class="btn gradient" type="button" disabled>Send ↗</button>
+      </div>
+      <p id="chatStatus" class="small muted" style="margin:0">Choose a friend to begin.</p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <p class="footer">AfterBell · Be kind to yourself and your squad.</p>
+ </section>
+</main>
 
-    const $ = id => document.getElementById(id);
-    const state = {
-      name: "", peer: null, peerId: "", peerOpened: false,
-      connections: new Map(), pendingIncoming: new Map(),
-      pendingOutgoing: new Map(), requests: [], squad: [],
-      notifications: [], histories: {}, activeFriend: "",
-      selectedMood: "", photoData: "", cameraStream: null,
-      unread: {}, unreadTotal: 0, lastNoticeTimer: null,
-      opening: false
-    };
+<script>
+"use strict";
 
-    function cleanName(name) {
-      return String(name || "").trim().replace(/\s+/g, " ");
-    }
-    function validName(name) {
-      return /^[a-zA-Z0-9_]{1,24}$/.test(name);
-    }
-    function peerIdFor(name) {
-      return PREFIX + name.trim().toLowerCase();
-    }
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, ch => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      })[ch]);
-    }
-    function loadDb() {
-      try {
-        const db = JSON.parse(localStorage.getItem(DB_KEY) || "{}");
-        return db && typeof db === "object" ? db : {};
-      } catch (_) { return {}; }
-    }
-    function saveDb() {
-      const db = loadDb();
-      db[state.name] = {
-        squad: state.squad.slice(0, 300),
-        histories: state.histories,
-        notifications: state.notifications.slice(0, MAX_NOTIFICATIONS),
-        mood: state.selectedMood,
-        updatedAt: Date.now()
-      };
-      try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
-      catch (_) { showNotice("This browser could not save your local data.", "error"); }
-    }
-    function restoreDb() {
-      const saved = loadDb()[state.name] || {};
-      state.squad = Array.isArray(saved.squad) ? saved.squad.filter(n => n !== state.name) : [];
-      state.histories = saved.histories && typeof saved.histories === "object" ? saved.histories : {};
-      state.notifications = Array.isArray(saved.notifications) ? saved.notifications : [];
-      state.selectedMood = saved.mood || "";
-      for (const friend of state.squad) state.histories[friend] ||= [];
-      updateMoodUI();
-      renderAll();
-    }
-    function showNotice(message, kind = "") {
-      const el = $("globalNotice");
-      el.textContent = message;
-      el.className = "notice" + (kind ? " " + kind : "");
-      clearTimeout(state.lastNoticeTimer);
-      state.lastNoticeTimer = setTimeout(() => el.classList.add("hidden"), 6500);
-    }
-    function setStatus(text, mode = "") {
-      $("statusText").textContent = text;
-      $("statusDot").className = "dot" + (mode ? " " + mode : "");
-    }
-    function notify(message) {
-      state.notifications.unshift({ id: cryptoId(), text: message, time: Date.now(), read: false });
-      state.notifications = state.notifications.slice(0, MAX_NOTIFICATIONS);
-      saveDb();
-      renderNotifications();
-    }
-    function cryptoId() {
-      try { return crypto.randomUUID(); }
-      catch (_) { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-    }
-    function setPeerStatus() {
-      if (state.peerOpened && state.peer && !state.peer.destroyed) {
-        setStatus("Online & Ready", "online");
-      } else if (state.peer && state.peer.disconnected) {
-        setStatus("Reconnecting…");
-      } else {
-        setStatus("Connecting to PeerJS…");
-      }
-      $("peerIdLabel").textContent = state.peerId || "Not initialized";
-    }
-    function addSquad(name) {
-      if (!name || name === state.name) return;
-      if (!state.squad.includes(name)) state.squad.push(name);
-      state.histories[name] ||= [];
-      saveDb();
-      renderAll();
-    }
-    function removeSquad(name) {
-      state.squad = state.squad.filter(n => n !== name);
-      delete state.histories[name];
-      state.connections.get(name)?.close();
-      state.connections.delete(name);
-      if (state.activeFriend === name) state.activeFriend = "";
-      saveDb();
-      renderAll();
-    }
-    function addHistory(name, msg) {
-      if (!name) return;
-      state.histories[name] ||= [];
-      state.histories[name].push(msg);
-      if (state.histories[name].length > MAX_HISTORY) {
-        state.histories[name] = state.histories[name].slice(-MAX_HISTORY);
-      }
-      if (state.activeFriend !== name || !$("chatTab").classList.contains("hidden") === false) {
-        if (msg.from !== state.name) {
-          state.unread[name] = (state.unread[name] || 0) + 1;
-        }
-      }
-      saveDb();
-      renderChat();
-      renderBadges();
-    }
-    function renderAll() {
-      renderRequests();
-      renderSquad();
-      renderNotifications();
-      renderChat();
-      renderBadges();
-    }
-    function renderBadges() {
-      const count = state.requests.length;
-      $("requestBadge").textContent = count;
-      $("requestBadge").classList.toggle("hidden", count === 0);
-      $("requestCount").textContent = count ? "(" + count + ")" : "";
-      $("chatBadge").textContent = state.unreadTotal || "";
-      $("chatBadge").classList.toggle("hidden", !state.unreadTotal);
-    }
-    function renderRequests() {
-      const list = $("requestList");
-      if (!state.requests.length) {
-        list.innerHTML = '<div class="empty">No friend requests yet.</div>';
-        renderBadges();
-        return;
-      }
-      list.innerHTML = state.requests.map(req => `
-        <div class="list-item">
-          <div><strong>${escapeHtml(req.from)}</strong><div class="small muted">Wants to join your squad</div></div>
-          <div class="actions">
-            <button class="btn green" data-accept="${escapeHtml(req.from)}" type="button">Accept</button>
-            <button class="btn red" data-decline="${escapeHtml(req.from)}" type="button">Decline</button>
-          </div>
-        </div>`).join("");
-      renderBadges();
-    }
-    function renderSquad() {
-      const list = $("squadList");
-      if (!state.squad.length) list.innerHTML = '<div class="empty">Your squad is waiting for friends.</div>';
-      else list.innerHTML = state.squad.map(name => {
-        const online = isConnected(name);
-        return `<div class="list-item">
-          <div class="row"><span class="dot ${online ? "online" : ""}"></span><div><strong>${escapeHtml(name)}</strong><div class="small muted">${online ? "Connected" : "Not connected"}</div></div></div>
-          <div class="actions"><button class="btn" data-chat="${escapeHtml(name)}" type="button">Chat</button><button class="btn red" data-remove="${escapeHtml(name)}" type="button">Remove</button></div>
-        </div>`;
-      }).join("");
-    }
-    function renderNotifications() {
-      const list = $("notificationList");
-      if (!state.notifications.length) {
-        list.innerHTML = '<div class="empty">You’re all caught up.</div>';
-        return;
-      }
-      list.innerHTML = state.notifications.slice(0, 12).map(n =>
-        `<div class="list-item"><div><div>${escapeHtml(n.text)}</div><div class="small muted">${new Date(n.time).toLocaleString()}</div></div></div>`
-      ).join("");
-    }
-    function isConnected(name) {
-      const conn = state.connections.get(name);
-      return !!conn && conn.open === true;
-    }
-    function renderChat() {
-      const friends = $("chatFriendList");
-      if (!state.squad.length) {
-        friends.innerHTML = '<div class="empty">Accept a friend request to start chatting.</div>';
-      } else {
-        friends.innerHTML = state.squad.map(name => `
-          <button class="btn friend-choice ${state.activeFriend === name ? "active" : ""}" data-select-chat="${escapeHtml(name)}" type="button">
-            ${escapeHtml(name)} ${isConnected(name) ? "🟢" : "⚪"}
-            ${(state.unread[name] || 0) ? " · " + state.unread[name] + " new" : ""}
-          </button>`).join("");
-      }
-      const friend = state.activeFriend;
-      const usable = !!friend && state.squad.includes(friend);
-      $("chatHeader").textContent = usable ? friend : "Choose a squad member";
-      $("messageInput").disabled = !usable;
-      $("sendMessageBtn").disabled = !usable;
-      $("chatPhotoInput").disabled = !usable;
-      const msgs = usable ? (state.histories[friend] || []) : [];
-      const list = $("messageList");
-      if (!usable || !msgs.length) {
-        list.innerHTML = '<div class="empty">No messages yet. Say hello when you connect.</div>';
-      } else {
-        list.innerHTML = msgs.map(m => {
-          const mine = m.from === state.name;
-          let body = escapeHtml(m.text || "");
-          if (m.photo) body += `<img src="${m.photo}" alt="Shared photo" loading="lazy">`;
-          return `<div class="bubble ${mine ? "mine" : ""}">${body}<div class="small" style="opacity:.7;margin-top:5px">${mine ? "You" : escapeHtml(m.from)} · ${new Date(m.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</div></div>`;
-        }).join("");
-        list.scrollTop = list.scrollHeight;
-      }
-      const connected = usable && isConnected(friend);
-      $("chatStatus").textContent = !usable ? "Choose a friend to begin." : connected
-        ? "Direct connection ready." : "Not connected. Try reconnecting from Squad.";
-    }
-    function updateMoodUI() {
-      document.querySelectorAll("[data-mood]").forEach(btn => {
-        btn.classList.toggle("selected", btn.dataset.mood === state.selectedMood);
-        btn.setAttribute("aria-pressed", String(btn.dataset.mood === state.selectedMood));
-      });
-    }
-    function addVibe(mood, note) {
-      const feed = $("vibeFeed");
-      if (feed.querySelector(".empty")) feed.innerHTML = "";
-      const item = document.createElement("div");
-      item.className = "feed-item";
-      const title = document.createElement("strong");
-      title.textContent = (mood || "Check-in") + " · " + new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-      const content = document.createElement("div");
-      content.className = "muted";
-      content.textContent = note || "Checked in with myself today.";
-      item.append(title, content);
-      feed.prepend(item);
-      while (feed.children.length > 8) feed.lastElementChild.remove();
-    }
+/*
+  DEMO SECURITY:
+  The requested localStorage account system stores passwords on this device
+  and is not suitable for real authentication. A real service needs a backend,
+  password hashing, secure sessions, and server-side identity verification.
 
-    function setupPeer(name) {
-      if (typeof Peer !== "function") {
-        setStatus("PeerJS failed to load", "error");
-        showNotice("PeerJS could not load. Check your internet connection and reload this page.", "error");
-        return;
+  Deterministic Peer IDs mean only ONE active connection can own a username
+  at a time on a given PeerJS signaling service. Signing in on another device
+  with the same username may fail while the first session is online.
+*/
+
+const $ = id => document.getElementById(id);
+const PREFIX = "afterbell_pg_2026_";
+const ACCOUNT_KEY = "afterbell_accounts";
+const DB_KEY = "afterbell_state_v2";
+const SESSION_KEY = "afterbell_active_user";
+const MAX_IMAGE_SIDE = 350;
+const MAX_PHOTO_CHARS = 280000;
+const MAX_HISTORY = 100;
+
+const state = {
+  name: "",
+  peer: null,
+  peerOpened: false,
+  peerId: "",
+  connections: new Map(),
+  pendingIncoming: new Map(),
+  pendingOutgoing: new Set(),
+  requests: [],
+  squad: [],
+  notifications: [],
+  histories: {},
+  unread: {},
+  activeFriend: "",
+  selectedMood: "",
+  cameraStream: null,
+  feeds: [],
+  noticeTimer: null
+};
+
+let authMode = "login";
+
+function cleanName(value) {
+  return String(value || "").trim();
+}
+function validName(name) {
+  return /^[a-zA-Z0-9_]{1,24}$/.test(name);
+}
+function peerIdFor(name) {
+  return PREFIX + name.toLowerCase();
+}
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function newId() {
+  try { return crypto.randomUUID(); }
+  catch (_) { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+}
+function readAccounts() {
+  try {
+    const value = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch (_) { return []; }
+}
+function readDb() {
+  try {
+    const value = JSON.parse(localStorage.getItem(DB_KEY) || "{}");
+    return value && typeof value === "object" ? value : {};
+  } catch (_) { return {}; }
+}
+function saveDb() {
+  if (!state.name) return;
+  const db = readDb();
+  db[state.name] = {
+    squad: state.squad,
+    histories: state.histories,
+    notifications: state.notifications.slice(0,60),
+    selectedMood: state.selectedMood,
+    feeds: state.feeds.slice(0,8)
+  };
+  try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+  catch (_) { showNotice("Could not save local data. Your browser storage may be full.", "error"); }
+}
+function restoreDb() {
+  const saved = readDb()[state.name] || {};
+  state.squad = Array.isArray(saved.squad) ? saved.squad.filter(n => n !== state.name) : [];
+  state.histories = saved.histories && typeof saved.histories === "object" ? saved.histories : {};
+  state.notifications = Array.isArray(saved.notifications) ? saved.notifications : [];
+  state.selectedMood = saved.selectedMood || "";
+  state.feeds = Array.isArray(saved.feeds) ? saved.feeds.slice(0,8) : [];
+  state.unread = {};
+  state.squad.forEach(n => { state.histories[n] ||= []; });
+  updateMoodUI();
+  renderFeed();
+  renderAll();
+}
+function showNotice(message, type = "") {
+  const el = $("globalNotice");
+  el.textContent = message;
+  el.className = "notice" + (type ? " " + type : "");
+  clearTimeout(state.noticeTimer);
+  state.noticeTimer = setTimeout(() => el.classList.add("hidden"), 7000);
+}
+function setStatus(message, type = "") {
+  $("statusText").textContent = message;
+  $("statusDot").className = "dot" + (type ? " " + type : "");
+}
+function addNotification(message) {
+  state.notifications.unshift({ id:newId(), text:message, time:Date.now() });
+  state.notifications = state.notifications.slice(0,60);
+  saveDb();
+  renderNotifications();
+}
+function addSquad(name) {
+  if (!name || name === state.name) return;
+  if (!state.squad.includes(name)) state.squad.push(name);
+  state.histories[name] ||= [];
+  saveDb();
+  renderAll();
+}
+function isConnected(name) {
+  const c = state.connections.get(name);
+  return !!c && c.open === true;
+}
+function renderAll() {
+  renderRequests();
+  renderSquad();
+  renderNotifications();
+  renderChat();
+  renderBadges();
+}
+function renderBadges() {
+  const count = state.requests.length;
+  $("requestBadge").textContent = count;
+  $("requestBadge").classList.toggle("hidden", !count);
+  $("requestCount").textContent = count ? "(" + count + ")" : "";
+  const unread = Object.values(state.unread).reduce((a,b) => a+b, 0);
+  $("chatBadge").textContent = unread;
+  $("chatBadge").classList.toggle("hidden", !unread);
+}
+function renderRequests() {
+  const el = $("requestList");
+  if (!state.requests.length) {
+    el.innerHTML = '<div class="empty">No friend requests yet.</div>';
+    renderBadges();
+    return;
+  }
+  el.innerHTML = state.requests.map(r => `
+    <div class="list-item">
+      <div><strong>${escapeHtml(r.from)}</strong><div class="small muted">Wants to join your squad</div></div>
+      <div class="actions">
+       <button class="btn green" type="button" data-accept="${escapeHtml(r.from)}">Accept</button>
+       <button class="btn red" type="button" data-decline="${escapeHtml(r.from)}">Decline</button>
+      </div>
+    </div>`).join("");
+  renderBadges();
+}
+function renderSquad() {
+  const el = $("squadList");
+  if (!state.squad.length) {
+    el.innerHTML = '<div class="empty">Your squad is waiting for friends.</div>';
+    return;
+  }
+  el.innerHTML = state.squad.map(name => `
+    <div class="list-item">
+      <div class="row"><span class="dot ${isConnected(name)?"online":""}"></span>
+       <div><strong>${escapeHtml(name)}</strong><div class="small muted">${isConnected(name)?"Connected":"Not connected"}</div></div>
+      </div>
+      <div class="actions">
+       <button class="btn" type="button" data-chat="${escapeHtml(name)}">Chat</button>
+       <button class="btn red" type="button" data-remove="${escapeHtml(name)}">Remove</button>
+      </div>
+    </div>`).join("");
+}
+function renderNotifications() {
+  const el = $("notificationList");
+  if (!state.notifications.length) {
+    el.innerHTML = '<div class="empty">You’re all caught up.</div>';
+    return;
+  }
+  el.innerHTML = state.notifications.slice(0,12).map(n => `
+    <div class="list-item"><div>${escapeHtml(n.text)}<div class="small muted">${new Date(n.time).toLocaleString()}</div></div></div>`).join("");
+}
+function renderChat() {
+  const friends = $("chatFriendList");
+  friends.innerHTML = state.squad.length ? state.squad.map(name => `
+    <button class="btn friend-choice ${state.activeFriend===name?"active":""}" data-select-chat="${escapeHtml(name)}" type="button">
+     ${escapeHtml(name)} ${isConnected(name)?"🟢":"⚪"} ${(state.unread[name]||0)?" · "+state.unread[name]+" new":""}
+    </button>`).join("") : '<div class="empty">Accept a friend request to start chatting.</div>';
+
+  const friend = state.activeFriend;
+  const usable = !!friend && state.squad.includes(friend);
+  $("chatHeader").textContent = usable ? friend : "Choose a squad member";
+  $("messageInput").disabled = !usable;
+  $("sendMessageBtn").disabled = !usable;
+  $("chatPhotoInput").disabled = !usable;
+
+  const messages = usable ? (state.histories[friend] || []) : [];
+  const el = $("messageList");
+  if (!usable || !messages.length) {
+    el.innerHTML = '<div class="empty">No messages yet. Say hello when you connect.</div>';
+  } else {
+    el.innerHTML = messages.map(m => {
+      const mine = m.from === state.name;
+      let body = escapeHtml(m.text || "");
+      if (m.photo) body += `<img src="${m.photo}" alt="Shared photo" loading="lazy">`;
+      return `<div class="bubble ${mine?"mine":""}">${body}<div class="small" style="opacity:.7;margin-top:5px">${mine?"You":escapeHtml(m.from)} · ${new Date(m.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</div></div>`;
+    }).join("");
+    el.scrollTop = el.scrollHeight;
+  }
+  $("chatStatus").textContent = !usable ? "Choose a friend to begin." :
+    isConnected(friend) ? "Direct connection ready." : "Not connected. Both users must be online.";
+  renderBadges();
+}
+function addHistory(name, message) {
+  state.histories[name] ||= [];
+  state.histories[name].push(message);
+  if (state.histories[name].length > MAX_HISTORY) state.histories[name] = state.histories[name].slice(-MAX_HISTORY);
+  const chatVisible = !$("chatTab").classList.contains("hidden");
+  if (message.from !== state.name && !(chatVisible && state.activeFriend === name)) {
+    state.unread[name] = (state.unread[name] || 0) + 1;
+  }
+  saveDb();
+  renderChat();
+}
+function updateMoodUI() {
+  document.querySelectorAll("[data-mood]").forEach(b => {
+    const selected = b.dataset.mood === state.selectedMood;
+    b.classList.toggle("selected", selected);
+    b.setAttribute("aria-pressed", String(selected));
+  });
+}
+function renderFeed() {
+  const el = $("vibeFeed");
+  if (!state.feeds.length) {
+    el.innerHTML = '<div class="empty">Your first vibe starts here.</div>';
+    return;
+  }
+  el.innerHTML = state.feeds.map(f => `
+    <div class="feed-item"><strong>${escapeHtml(f.mood || "Check-in")} · ${new Date(f.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</strong>
+    <div class="muted">${escapeHtml(f.note || "Checked in with myself today.")}</div></div>`).join("");
+}
+
+/* Authentication */
+
+function setAuthMode(mode) {
+  authMode = mode;
+  $("loginTab").classList.toggle("active", mode === "login");
+  $("signupTab").classList.toggle("active", mode === "signup");
+  $("authSubmit").textContent = mode === "login" ? "Log In →" : "Create Account →";
+  $("authPassword").autocomplete = mode === "login" ? "current-password" : "new-password";
+  $("authError").classList.add("hidden");
+}
+function showAuthError(message) {
+  $("authError").textContent = message;
+  $("authError").classList.remove("hidden");
+}
+$("loginTab").addEventListener("click", () => setAuthMode("login"));
+$("signupTab").addEventListener("click", () => setAuthMode("signup"));
+$("togglePassword").addEventListener("click", () => {
+  const input = $("authPassword");
+  const showing = input.type === "text";
+  input.type = showing ? "password" : "text";
+  $("togglePassword").textContent = showing ? "👁" : "🙈";
+  $("togglePassword").setAttribute("aria-label", showing ? "Show password" : "Hide password");
+});
+
+$("authForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const username = cleanName($("authUsername").value);
+  const password = $("authPassword").value;
+  if (!validName(username)) {
+    showAuthError("Username must contain only letters, numbers, or underscores (1–24 characters).");
+    return;
+  }
+  if (password.length < 8 || password.length > 128) {
+    showAuthError("Password must be between 8 and 128 characters.");
+    return;
+  }
+
+  const accounts = readAccounts();
+  const existing = accounts.find(a => a.username.toLowerCase() === username.toLowerCase());
+
+  if (authMode === "signup") {
+    if (existing) {
+      showAuthError("That username already exists on this device. Please log in.");
+      return;
+    }
+    accounts.push({ username, password });
+    try {
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts));
+    } catch (_) {
+      showAuthError("Could not save your account. Check your browser storage.");
+      return;
+    }
+  } else {
+    if (!existing || existing.password !== password) {
+      showAuthError("Invalid username or password");
+      return;
+    }
+    // Use the stored capitalization of the registered username.
+  }
+
+  const account = authMode === "login" ? existing : { username, password };
+  startSession(account.username);
+});
+
+function startSession(username) {
+  state.name = username;
+  try { sessionStorage.setItem(SESSION_KEY, username); } catch (_) {}
+  $("authPassword").value = "";
+  $("authError").classList.add("hidden");
+  $("welcomeScreen").classList.add("hidden");
+  $("appScreen").classList.remove("hidden");
+  $("headerUser").classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
+  $("headerName").textContent = username;
+  $("displayName").textContent = username;
+  restoreDb();
+  setupPeer();
+}
+
+function logout() {
+  stopCamera();
+  if (state.peer) {
+    try { state.peer.destroy(); } catch (_) {}
+  }
+  state.peer = null;
+  state.peerOpened = false;
+  state.peerId = "";
+  state.connections.clear();
+  state.pendingIncoming.clear();
+  state.pendingOutgoing.clear();
+  state.requests = [];
+  state.squad = [];
+  state.histories = {};
+  state.notifications = [];
+  state.feeds = [];
+  state.unread = {};
+  state.activeFriend = "";
+  state.selectedMood = "";
+  state.name = "";
+
+  try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+
+  $("appScreen").classList.add("hidden");
+  $("welcomeScreen").classList.remove("hidden");
+  $("headerUser").classList.add("hidden");
+  $("logoutBtn").classList.add("hidden");
+  $("authUsername").value = "";
+  $("authPassword").value = "";
+  $("ventBox").value = "";
+  $("adviceBox").classList.add("hidden");
+  $("photoPreview").classList.add("hidden");
+  $("photoInfo").textContent = "";
+  $("clearPhotoBtn").classList.add("hidden");
+  $("peerIdLabel").textContent = "Not connected";
+  $("globalNotice").classList.add("hidden");
+  $("vibeFeed").innerHTML = '<div class="empty">Your first vibe starts here.</div>';
+  $("friendNameInput").value = "";
+  $("messageInput").value = "";
+  $("statusText").textContent = "Sign in to continue";
+  $("statusDot").className = "dot";
+  setAuthMode("login");
+}
+$("logoutBtn").addEventListener("click", () => {
+  if (confirm("Log out of AfterBell on this device?")) logout();
+});
+
+/* PeerJS connection management */
+
+function setupPeer() {
+  if (typeof Peer !== "function") {
+    setStatus("PeerJS failed to load", "error");
+    showNotice("PeerJS failed to load. Check your internet connection and reload.", "error");
+    return;
+  }
+  if (state.peer) {
+    try { state.peer.destroy(); } catch (_) {}
+  }
+  state.peerOpened = false;
+  state.peerId = peerIdFor(state.name);
+  setStatus("Connecting to PeerJS…");
+  $("peerIdLabel").textContent = state.peerId;
+
+  let peer;
+  try {
+    peer = new Peer(state.peerId, {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" }
+        ]
       }
-      if (state.peer) {
-        try { state.peer.destroy(); } catch (_) {}
-      }
+    });
+  } catch (err) {
+    setStatus("Could not initialize PeerJS", "error");
+    showNotice("Could not initialize PeerJS: " + err.message, "error");
+    return;
+  }
+  state.peer = peer;
+
+  peer.on("open", id => {
+    if (state.peer !== peer) return;
+    state.peerOpened = true;
+    state.peerId = id;
+    setStatus("Online & Ready", "online");
+    $("peerIdLabel").textContent = id;
+    showNotice("You're online and ready for friend requests.", "success");
+    renderAll();
+  });
+
+  peer.on("connection", conn => {
+    if (state.peer !== peer) {
+      conn.close();
+      return;
+    }
+    registerConnection(conn);
+  });
+
+  peer.on("disconnected", () => {
+    if (state.peer !== peer) return;
+    state.peerOpened = false;
+    setStatus("Reconnecting…");
+    try { if (!peer.destroyed) peer.reconnect(); } catch (_) {}
+  });
+
+  peer.on("close", () => {
+    if (state.peer === peer) {
       state.peerOpened = false;
-      state.opening = true;
-      state.peerId = peerIdFor(name);
-      state.connections.clear();
-      state.pendingIncoming.clear();
-      state.pendingOutgoing.clear();
-      setPeerStatus();
+      setStatus("Offline");
+    }
+  });
 
-      let peer;
-      try {
-        peer = new Peer(state.peerId, {
-          debug: 1,
-          config: {
-            iceServers: [
-              { urls: "stun:stun.l.google.com:19302" },
-              { urls: "stun:stun1.l.google.com:19302" }
-            ]
-          }
-        });
-      } catch (err) {
-        state.opening = false;
-        setStatus("Could not initialize PeerJS", "error");
-        showNotice("Could not initialize PeerJS: " + err.message, "error");
+  peer.on("error", err => {
+    if (state.peer !== peer) return;
+    const messages = {
+      "unavailable-id":"This username is already online in another session. Log out of the other session or choose a different username.",
+      "peer-unavailable":"That friend is not reachable. Ask them to log in and open AfterBell.",
+      "network":"Network connection failed. Check your internet connection.",
+      "server-error":"PeerJS signaling server error. Please try again later.",
+      "socket-error":"PeerJS signaling socket failed.",
+      "socket-closed":"PeerJS signaling socket closed. Reconnecting may help."
+    };
+    setStatus("Connection issue", "error");
+    showNotice(messages[err.type] || ("PeerJS error: " + (err.message || err.type)), "error");
+  });
+}
+
+function sendPacket(conn, packet) {
+  if (!conn || !conn.open) return false;
+  try {
+    conn.send(packet);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function registerConnection(conn) {
+  if (conn.__afterbellRegistered) return;
+  conn.__afterbellRegistered = true;
+  conn.__remoteName = "";
+  conn.__authorized = false;
+  conn.__seenIds = new Set();
+
+  conn.on("open", () => {
+    sendPacket(conn, { type:"hello", from:state.name, version:1 });
+    renderAll();
+  });
+
+  conn.on("data", packet => {
+    if (!packet || typeof packet !== "object" || typeof packet.type !== "string") return;
+    handlePacket(conn, packet);
+  });
+
+  conn.on("close", () => {
+    const name = conn.__remoteName;
+    if (name && state.connections.get(name) === conn) state.connections.delete(name);
+    if (name && state.pendingIncoming.get(name) === conn) state.pendingIncoming.delete(name);
+    renderAll();
+  });
+
+  conn.on("error", () => renderAll());
+}
+
+function connectTo(name, purpose) {
+  name = cleanName(name);
+  if (!validName(name)) {
+    showNotice("Use letters, numbers, or underscores only (1–24 characters).", "error");
+    return null;
+  }
+  if (name.toLowerCase() === state.name.toLowerCase()) {
+    showNotice("You can't connect to your own username.", "error");
+    return null;
+  }
+  if (!state.peer || !state.peerOpened || state.peer.destroyed) {
+    showNotice("Wait for your Online & Ready status before connecting.", "error");
+    return null;
+  }
+
+  const existing = state.connections.get(name);
+  if (existing && (existing.open || existing.__connecting)) return existing;
+
+  let conn;
+  try {
+    conn = state.peer.connect(peerIdFor(name), {
+      reliable:true,
+      serialization:"binary",
+      metadata:{ app:"AfterBell", version:1 }
+    });
+  } catch (err) {
+    showNotice("Could not start connection: " + err.message, "error");
+    return null;
+  }
+
+  conn.__connecting = true;
+  conn.__purpose = purpose;
+  conn.__remoteName = name;
+  state.connections.set(name, conn);
+  registerConnection(conn);
+
+  conn.on("open", () => {
+    conn.__connecting = false;
+    sendPacket(conn, { type:"hello", from:state.name, version:1 });
+
+    if (purpose === "friend_request") {
+      state.pendingOutgoing.add(name);
+      if (!sendPacket(conn, { type:"friend_request", from:state.name })) {
+        state.pendingOutgoing.delete(name);
+        showNotice("The friend request could not be sent.", "error");
         return;
       }
-      state.peer = peer;
-
-      peer.on("open", id => {
-        if (state.peer !== peer) return;
-        state.peerOpened = true;
-        state.opening = false;
-        state.peerId = id;
-        setPeerStatus();
-        $("peerIdLabel").textContent = id;
-        showNotice("You're online and ready for friend requests.", "success");
-        // Retry requests that were accepted or queued before opening.
-        for (const friend of state.squad) {
-          if (state.pendingOutgoing.has(friend) || !isConnected(friend)) {
-            // Connections are only retried on user action to avoid loops.
-          }
-        }
-      });
-
-      peer.on("connection", conn => {
-        if (state.peer !== peer) { conn.close(); return; }
-        registerConnection(conn, "incoming");
-      });
-
-      peer.on("disconnected", () => {
-        if (state.peer !== peer) return;
-        state.peerOpened = false;
-        setPeerStatus();
-        // Reconnect signaling; this does not promise that every peer is reachable.
-        if (!peer.destroyed) {
-          try { peer.reconnect(); } catch (_) {}
-        }
-      });
-
-      peer.on("close", () => {
-        if (state.peer !== peer) return;
-        state.peerOpened = false;
-        setStatus("Offline", "");
-      });
-
-      peer.on("error", err => {
-        if (state.peer !== peer) return;
-        const messages = {
-          "unavailable-id": "That username is already online in another session. Choose a different username or close the other session.",
-          "peer-unavailable": "That friend is not reachable right now. Ask them to open AfterBell and check their connection.",
-          "network": "The signaling connection failed. Check your internet and try again.",
-          "server-error": "The PeerJS signaling server returned an error. Try again later.",
-          "socket-error": "The signaling socket failed. Check your internet connection.",
-          "socket-closed": "The signaling socket closed. Reconnecting may help."
-        };
-        setStatus("Connection issue", "error");
-        showNotice(messages[err.type] || ("PeerJS: " + (err.message || err.type || "connection error")), "error");
-        if (err.type === "peer-unavailable") {
-          for (const [friend, conn] of state.connections) {
-            if (conn.peer === err.peer && !conn.open) state.connections.delete(friend);
-          }
-          renderAll();
-        }
-      });
+      addNotification("Friend request sent to " + name + ".");
+      showNotice("Friend request sent to " + name + ".", "success");
     }
+    renderAll();
+  });
 
-    function registerConnection(conn, direction) {
-      if (!conn || conn.__afterbellRegistered) return;
-      conn.__afterbellRegistered = true;
-      conn.__direction = direction;
-      conn.__authorized = false;
-      conn.__remoteName = "";
-      conn.__seenMessageIds = new Set();
-      conn.on("open", () => {
-        if (state.peer && conn.peer === state.peer.id) { conn.close(); return; }
-        renderAll();
-        // Exchange identity after the data channel is ready.
-        try { conn.send({ type: "hello", from: state.name, version: 1 }); } catch (_) {}
-      });
-      conn.on("data", packet => {
-        if (!packet || typeof packet !== "object" || typeof packet.type !== "string") return;
-        handlePacket(conn, packet);
-      });
-      conn.on("close", () => {
-        const name = conn.__remoteName;
-        if (name && state.connections.get(name) === conn) state.connections.delete(name);
-        renderAll();
-      });
-      conn.on("error", err => {
-        showNotice("Connection problem: " + (err.message || "data channel error"), "error");
-        renderAll();
-      });
+  conn.on("error", () => {
+    conn.__connecting = false;
+    if (state.connections.get(name) === conn) state.connections.delete(name);
+    renderAll();
+  });
+
+  return conn;
+}
+
+function handlePacket(conn, packet) {
+  const from = cleanName(packet.from || "");
+
+  if (packet.type === "hello") {
+    if (!validName(from) || peerIdFor(from) !== conn.peer) {
+      conn.close();
+      return;
     }
-
-    function connectTo(name, purpose = "manual") {
-      name = cleanName(name);
-      if (!validName(name)) {
-        showNotice("Use a username containing only letters, numbers, or underscores (1–24 characters).", "error");
-        return null;
-      }
-      if (name.toLowerCase() === state.name.toLowerCase()) {
-        showNotice("You can't connect to your own username.", "error");
-        return null;
-      }
-      if (!state.peer || !state.peerOpened || state.peer.destroyed) {
-        showNotice("Your PeerJS connection isn't ready yet. Wait for Online & Ready.", "error");
-        return null;
-      }
-      const existing = state.connections.get(name);
-      if (existing && (existing.open || existing.__connecting)) return existing;
-
-      const remoteId = peerIdFor(name);
-      let conn;
-      try {
-        conn = state.peer.connect(remoteId, {
-          reliable: true,
-          serialization: "binary",
-          metadata: { app: "AfterBell", version: 1 }
-        });
-      } catch (err) {
-        showNotice("Couldn't start the connection: " + err.message, "error");
-        return null;
-      }
-      conn.__connecting = true;
-      conn.__remoteName = name;
-      state.connections.set(name, conn);
-      registerConnection(conn, "outgoing");
-      conn.on("open", () => {
-        conn.__connecting = false;
-        if (purpose === "friend_request") {
-          sendPacket(conn, { type: "friend_request", from: state.name });
-          state.pendingOutgoing.set(name, Date.now());
-          notify("Friend request sent to " + name + ".");
-          showNotice("Friend request sent to " + name + ".", "success");
-        }
-        renderAll();
-      });
-      conn.on("error", () => {
-        conn.__connecting = false;
-        if (state.connections.get(name) === conn) state.connections.delete(name);
-        renderAll();
-      });
-      return conn;
+    if (conn.__remoteName && conn.__remoteName !== from) {
+      conn.close();
+      return;
     }
+    conn.__remoteName = from;
 
-    function sendPacket(conn, packet) {
-      if (!conn || !conn.open) return false;
-      try { conn.send(packet); return true; }
-      catch (_) { return false; }
-    }
-
-    function handlePacket(conn, packet) {
-      const from = cleanName(packet.from || "");
-      if (packet.type === "hello") {
-        if (!validName(from) || peerIdFor(from) !== conn.peer) {
-          conn.close();
-          return;
-        }
-        conn.__remoteName = from;
-        const current = state.connections.get(from);
-        if (current && current !== conn && current.open) {
-          // Keep the existing connection to avoid duplicate chat channels.
-          conn.close();
-          return;
-        }
-        state.connections.set(from, conn);
-        conn.__authorized = state.squad.includes(from);
-        renderAll();
-        return;
-      }
-
-      if (!validName(from) || peerIdFor(from) !== conn.peer) {
+    const existing = state.connections.get(from);
+    if (existing && existing !== conn && existing.open) {
+      // Prefer an existing channel so duplicate connections do not split chat.
+      if (existing.__authorized || existing.__purpose === "friend_request") {
         conn.close();
         return;
       }
-      if (!conn.__remoteName) {
-        conn.__remoteName = from;
-        state.connections.set(from, conn);
-      }
-      if (conn.__remoteName !== from) {
-        conn.close();
-        return;
-      }
-
-      switch (packet.type) {
-        case "friend_request": {
-          if (from.toLowerCase() === state.name.toLowerCase()) return;
-          if (state.squad.includes(from)) {
-            sendPacket(conn, { type: "friend_accepted", from: state.name });
-            conn.__authorized = true;
-            return;
-          }
-          if (!state.requests.some(r => r.from === from)) {
-            state.requests.unshift({ from, receivedAt: Date.now() });
-            state.requests = state.requests.slice(0, 100);
-            notify("New friend request from " + from + ".");
-            showNotice("Friend request received from " + from + ".", "success");
-            renderRequests();
-          }
-          return;
-        }
-        case "friend_accepted": {
-          if (!state.pendingOutgoing.has(from) && !state.squad.includes(from)) return;
-          state.pendingOutgoing.delete(from);
-          addSquad(from);
-          conn.__authorized = true;
-          notify(from + " accepted your friend request.");
-          showNotice(from + " is now in your squad.", "success");
-          // Send reciprocal acknowledgement so both clients converge on squad membership.
-          sendPacket(conn, { type: "friend_confirmed", from: state.name });
-          renderAll();
-          return;
-        }
-        case "friend_confirmed": {
-          if (state.squad.includes(from)) {
-            conn.__authorized = true;
-            addSquad(from);
-          }
-          return;
-        }
-        case "friend_declined": {
-          state.pendingOutgoing.delete(from);
-          notify(from + " declined your friend request.");
-          renderAll();
-          return;
-        }
-        case "chat_message": {
-          if (!state.squad.includes(from) || !conn.__authorized) return;
-          const id = String(packet.id || "");
-          if (!id || conn.__seenMessageIds.has(id)) return;
-          conn.__seenMessageIds.add(id);
-          const text = typeof packet.text === "string" ? packet.text.slice(0, 3000) : "";
-          if (!text) return;
-          addHistory(from, { id, from, text, time: Number(packet.time) || Date.now() });
-          return;
-        }
-        case "chat_photo": {
-          if (!state.squad.includes(from) || !conn.__authorized) return;
-          const id = String(packet.id || "");
-          if (!id || conn.__seenMessageIds.has(id)) return;
-          conn.__seenMessageIds.add(id);
-          if (typeof packet.photo !== "string" || !packet.photo.startsWith("data:image/jpeg;base64,")) return;
-          if (packet.photo.length > 280000) return;
-          addHistory(from, {
-            id, from, text: "", photo: packet.photo,
-            time: Number(packet.time) || Date.now()
-          });
-          return;
-        }
-      }
     }
+    state.connections.set(from, conn);
+    conn.__authorized = state.squad.includes(from);
+    renderAll();
+    return;
+  }
 
-    function acceptRequest(name) {
-      const req = state.requests.find(r => r.from === name);
-      if (!req) return;
-      let conn = state.connections.get(name);
-      if (!conn || !conn.open) {
-        // The incoming request channel may still be available in pendingIncoming.
-        conn = state.pendingIncoming.get(name);
-      }
-      if (!conn || !conn.open) {
-        conn = connectTo(name, "accept");
-      }
-      if (!conn) {
-        showNotice("Could not reach " + name + ". Ask them to send a new request while both devices are online.", "error");
+  if (!validName(from) || peerIdFor(from) !== conn.peer) {
+    conn.close();
+    return;
+  }
+  if (conn.__remoteName && conn.__remoteName !== from) {
+    conn.close();
+    return;
+  }
+  conn.__remoteName = from;
+  if (state.connections.get(from) !== conn) state.connections.set(from, conn);
+
+  switch (packet.type) {
+    case "friend_request": {
+      if (from.toLowerCase() === state.name.toLowerCase()) return;
+      state.pendingIncoming.set(from, conn);
+      if (state.squad.includes(from)) {
+        conn.__authorized = true;
+        sendPacket(conn, { type:"friend_accepted", from:state.name });
         return;
       }
-      addSquad(name);
+      if (!state.requests.some(r => r.from === from)) {
+        state.requests.unshift({ from, time:Date.now() });
+        state.requests = state.requests.slice(0,100);
+        addNotification("New friend request from " + from + ".");
+        showNotice("Friend request received from " + from + ".", "success");
+      }
+      renderAll();
+      break;
+    }
+    case "friend_accepted": {
+      if (!state.pendingOutgoing.has(from) && !state.squad.includes(from)) return;
+      state.pendingOutgoing.delete(from);
       conn.__authorized = true;
-      sendPacket(conn, { type: "friend_accepted", from: state.name });
-      state.requests = state.requests.filter(r => r.from !== name);
-      notify("You accepted " + name + "'s friend request.");
-      showNotice(name + " was added to your squad.", "success");
+      addSquad(from);
+      sendPacket(conn, { type:"friend_confirmed", from:state.name });
+      addNotification(from + " accepted your friend request.");
+      showNotice(from + " is now in your squad.", "success");
       renderAll();
+      break;
     }
-
-    function declineRequest(name) {
-      const conn = state.connections.get(name) || state.pendingIncoming.get(name);
-      if (conn && conn.open) sendPacket(conn, { type: "friend_declined", from: state.name });
-      state.requests = state.requests.filter(r => r.from !== name);
-      state.pendingIncoming.delete(name);
-      notify("Friend request from " + name + " declined.");
-      renderAll();
-    }
-
-    function sendChatMessage() {
-      const name = state.activeFriend;
-      const text = $("messageInput").value.trim();
-      if (!name || !text) return;
-      const conn = state.connections.get(name);
-      if (!conn || !conn.open || !conn.__authorized) {
-        showNotice("You're not connected to " + name + ". Open AfterBell on both devices and reconnect.", "error");
-        return;
-      }
-      const packet = { type: "chat_message", id: cryptoId(), from: state.name, text: text.slice(0, 3000), time: Date.now() };
-      if (!sendPacket(conn, packet)) {
-        showNotice("Message could not be sent. Check the connection.", "error");
-        return;
-      }
-      addHistory(name, { id: packet.id, from: state.name, text: packet.text, time: packet.time });
-      $("messageInput").value = "";
-    }
-
-    async function compressImage(file) {
-      if (!file || !file.type.startsWith("image/")) throw new Error("Choose a valid image file.");
-      if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
-      const url = URL.createObjectURL(file);
-      try {
-        const img = new Image();
-        img.src = url;
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = () => reject(new Error("Couldn't read that image."));
-        });
-        const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-        const width = Math.max(1, Math.round(img.naturalWidth * scale));
-        const height = Math.max(1, Math.round(img.naturalHeight * scale));
-        const canvas = $("photoCanvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d", { alpha: false });
-        ctx.drawImage(img, 0, 0, width, height);
-        let quality = 0.78;
-        let data = canvas.toDataURL("image/jpeg", quality);
-        while (data.length > MAX_IMAGE_BYTES * 1.4 && quality > 0.3) {
-          quality -= 0.1;
-          data = canvas.toDataURL("image/jpeg", quality);
-        }
-        return { data, width, height, bytes: Math.round(data.length * 0.75), quality };
-      } finally {
-        URL.revokeObjectURL(url);
-      }
-    }
-
-    function stopCamera() {
-      if (state.cameraStream) {
-        state.cameraStream.getTracks().forEach(track => track.stop());
-        state.cameraStream = null;
-      }
-      $("cameraVideo").srcObject = null;
-      $("cameraVideo").classList.add("hidden");
-      $("captureBtn").classList.add("hidden");
-      $("stopCameraBtn").classList.add("hidden");
-      $("cameraBtn").classList.remove("hidden");
-    }
-
-    async function usePhotoFile(file) {
-      try {
-        const result = await compressImage(file);
-        state.photoData = result.data;
-        $("photoPreview").src = result.data;
-        $("photoPreview").classList.remove("hidden");
-        $("photoInfo").textContent = `${result.width} × ${result.height}px · compressed JPEG · approximately ${Math.max(1, Math.round(result.bytes / 1024))} KB`;
-        $("clearPhotoBtn").classList.remove("hidden");
-      } catch (err) {
-        showNotice(err.message || "Could not process that image.", "error");
-      }
-    }
-
-    $("welcomeForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const name = cleanName($("nameInput").value);
-      if (!validName(name)) {
-        showNotice("Choose 1–24 letters, numbers, or underscores only.", "error");
-        return;
-      }
-      state.name = name;
-      $("welcomeScreen").classList.add("hidden");
-      $("appScreen").classList.remove("hidden");
-      $("displayName").textContent = name;
-      restoreDb();
-      setupPeer(name);
-    });
-
-    $("changeNameBtn").addEventListener("click", () => {
-      if (!confirm("Change username? Your saved squad and messages stay in this browser under the current username.")) return;
-      stopCamera();
-      if (state.peer) {
-        try { state.peer.destroy(); } catch (_) {}
-      }
-      state.peer = null;
-      state.peerOpened = false;
-      state.name = "";
-      $("appScreen").classList.add("hidden");
-      $("welcomeScreen").classList.remove("hidden");
-      $("nameInput").value = "";
-      setStatus("Offline · Enter your name");
-    });
-
-    $("copyIdBtn").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(state.peerId);
-        showNotice("Peer ID copied.", "success");
-      } catch (_) {
-        showNotice("Clipboard access is unavailable. Copy the Peer ID shown on screen.", "error");
-      }
-    });
-
-    $("addFriendForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const name = cleanName($("friendNameInput").value);
-      if (!validName(name)) {
-        showNotice("Use letters, numbers, or underscores only (1–24 characters).", "error");
-        return;
-      }
-      if (name.toLowerCase() === state.name.toLowerCase()) {
-        showNotice("That's your own username.", "error");
-        return;
-      }
-      if (state.squad.includes(name)) {
-        showNotice(name + " is already in your squad.", "error");
-        return;
-      }
-      if (state.pendingOutgoing.has(name)) {
-        showNotice("You already have a pending request to " + name + ".", "error");
-        return;
-      }
-      const conn = connectTo(name, "friend_request");
-      if (!conn) return;
-      $("friendNameInput").value = "";
-    });
-
-    $("requestList").addEventListener("click", e => {
-      const accept = e.target.closest("[data-accept]");
-      const decline = e.target.closest("[data-decline]");
-      if (accept) acceptRequest(accept.dataset.accept);
-      if (decline) declineRequest(decline.dataset.decline);
-    });
-
-    $("squadList").addEventListener("click", e => {
-      const chat = e.target.closest("[data-chat]");
-      const remove = e.target.closest("[data-remove]");
-      if (chat) {
-        state.activeFriend = chat.dataset.chat;
-        $("squadTab").classList.add("hidden");
-        $("chatTab").classList.remove("hidden");
-        document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === "chat"));
-        state.unread[state.activeFriend] = 0;
+    case "friend_confirmed": {
+      if (state.squad.includes(from)) {
+        conn.__authorized = true;
         renderAll();
       }
-      if (remove && confirm("Remove " + remove.dataset.remove + " from your squad on this device?")) {
-        removeSquad(remove.dataset.remove);
-      }
-    });
-
-    $("chatFriendList").addEventListener("click", e => {
-      const btn = e.target.closest("[data-select-chat]");
-      if (!btn) return;
-      state.activeFriend = btn.dataset.selectChat;
-      state.unread[state.activeFriend] = 0;
-      state.unreadTotal = Object.values(state.unread).reduce((sum, n) => sum + n, 0);
+      break;
+    }
+    case "friend_declined": {
+      state.pendingOutgoing.delete(from);
+      addNotification(from + " declined your friend request.");
       renderAll();
+      break;
+    }
+    case "chat_message": {
+      if (!state.squad.includes(from) || !conn.__authorized) return;
+      const id = String(packet.id || "");
+      if (!id || conn.__seenIds.has(id)) return;
+      conn.__seenIds.add(id);
+      if (typeof packet.text !== "string") return;
+      addHistory(from, {
+        id, from, text:packet.text.slice(0,3000),
+        time:Number(packet.time) || Date.now()
+      });
+      break;
+    }
+    case "chat_photo": {
+      if (!state.squad.includes(from) || !conn.__authorized) return;
+      const id = String(packet.id || "");
+      if (!id || conn.__seenIds.has(id)) return;
+      conn.__seenIds.add(id);
+      if (typeof packet.photo !== "string" ||
+          !packet.photo.startsWith("data:image/jpeg;base64,") ||
+          packet.photo.length > MAX_PHOTO_CHARS) return;
+      addHistory(from, {
+        id, from, text:"", photo:packet.photo,
+        time:Number(packet.time) || Date.now()
+      });
+      break;
+    }
+  }
+}
+
+function acceptRequest(name) {
+  const conn = state.pendingIncoming.get(name) || state.connections.get(name);
+  if (!conn || !conn.open) {
+    showNotice("The sender's connection is no longer available. Ask them to send a new request.", "error");
+    return;
+  }
+  addSquad(name);
+  conn.__authorized = true;
+  if (!sendPacket(conn, { type:"friend_accepted", from:state.name })) {
+    showNotice("Could not send acceptance. Try again.", "error");
+    return;
+  }
+  state.requests = state.requests.filter(r => r.from !== name);
+  addNotification("You accepted " + name + "'s friend request.");
+  showNotice(name + " was added to your squad.", "success");
+  renderAll();
+}
+function declineRequest(name) {
+  const conn = state.pendingIncoming.get(name) || state.connections.get(name);
+  if (conn && conn.open) sendPacket(conn, { type:"friend_declined", from:state.name });
+  state.requests = state.requests.filter(r => r.from !== name);
+  state.pendingIncoming.delete(name);
+  addNotification("Friend request from " + name + " declined.");
+  renderAll();
+}
+
+$("addFriendForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = cleanName($("friendNameInput").value);
+  if (!validName(name)) {
+    showNotice("Use letters, numbers, or underscores only (1–24 characters).", "error");
+    return;
+  }
+  if (name.toLowerCase() === state.name.toLowerCase()) {
+    showNotice("That's your own username.", "error");
+    return;
+  }
+  if (state.squad.includes(name)) {
+    showNotice(name + " is already in your squad.", "error");
+    return;
+  }
+  if (state.pendingOutgoing.has(name)) {
+    showNotice("A request to " + name + " is already pending.", "error");
+    return;
+  }
+  const conn = connectTo(name, "friend_request");
+  if (conn) $("friendNameInput").value = "";
+});
+
+$("requestList").addEventListener("click", e => {
+  const accept = e.target.closest("[data-accept]");
+  const decline = e.target.closest("[data-decline]");
+  if (accept) acceptRequest(accept.dataset.accept);
+  if (decline) declineRequest(decline.dataset.decline);
+});
+
+$("squadList").addEventListener("click", e => {
+  const chat = e.target.closest("[data-chat]");
+  const remove = e.target.closest("[data-remove]");
+  if (chat) openChat(chat.dataset.chat);
+  if (remove) {
+    const name = remove.dataset.remove;
+    if (!confirm("Remove " + name + " from your squad on this device?")) return;
+    state.squad = state.squad.filter(n => n !== name);
+    state.requests = state.requests.filter(r => r.from !== name);
+    state.pendingOutgoing.delete(name);
+    state.pendingIncoming.delete(name);
+    const conn = state.connections.get(name);
+    if (conn) conn.close();
+    state.connections.delete(name);
+    delete state.histories[name];
+    if (state.activeFriend === name) state.activeFriend = "";
+    saveDb();
+    renderAll();
+  }
+});
+
+function openChat(name) {
+  state.activeFriend = name;
+  state.unread[name] = 0;
+  $("squadTab").classList.add("hidden");
+  $("chatTab").classList.remove("hidden");
+  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === "chat"));
+  renderAll();
+}
+$("chatFriendList").addEventListener("click", e => {
+  const btn = e.target.closest("[data-select-chat]");
+  if (btn) openChat(btn.dataset.selectChat);
+});
+
+document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("click", () => {
+  const tab = btn.dataset.tab;
+  $("squadTab").classList.toggle("hidden", tab !== "squad");
+  $("chatTab").classList.toggle("hidden", tab !== "chat");
+  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b === btn));
+  if (tab === "chat" && state.activeFriend) state.unread[state.activeFriend] = 0;
+  renderAll();
+}));
+
+function sendChatMessage() {
+  const name = state.activeFriend;
+  const text = $("messageInput").value.trim();
+  if (!name || !text) return;
+  const conn = state.connections.get(name);
+  if (!conn || !conn.open || !conn.__authorized) {
+    showNotice("You're not connected to " + name + ". Ask them to open AfterBell and reconnect.", "error");
+    return;
+  }
+  const packet = { type:"chat_message", id:newId(), from:state.name, text:text.slice(0,3000), time:Date.now() };
+  if (!sendPacket(conn, packet)) {
+    showNotice("Message could not be sent. Check the connection.", "error");
+    return;
+  }
+  addHistory(name, { id:packet.id, from:state.name, text:packet.text, time:packet.time });
+  $("messageInput").value = "";
+}
+$("sendMessageBtn").addEventListener("click", sendChatMessage);
+$("messageInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+
+/* Feelings, advice, and local Daily Vibe Feed */
+
+$("moodPills").addEventListener("click", e => {
+  const btn = e.target.closest("[data-mood]");
+  if (!btn) return;
+  state.selectedMood = btn.dataset.mood;
+  updateMoodUI();
+  saveDb();
+});
+
+$("adviceBtn").addEventListener("click", () => {
+  const mood = state.selectedMood;
+  const note = $("ventBox").value.trim();
+  const advice = {
+    Happy:"Enjoy the good moment. What made today better? Write it down or share the good news with someone you trust.",
+    Okay:"An okay day still counts. Pick one small thing you can finish, then give yourself permission to rest.",
+    Tired:"Try a short break, some water, and a snack if you need one. You don't have to solve everything while you're exhausted.",
+    Stressed:"Pause for a moment and take a few comfortable, slow breaths. Break the next task into one tiny step. If school pressure feels too big, talk with a trusted adult or teacher.",
+    Sad:"You don't have to force yourself to feel cheerful. Name what you need right now and consider reaching out to someone kind and trustworthy.",
+    Excited:"That's great energy! Choose one thing you want to enjoy or work toward, and let yourself celebrate your progress."
+  };
+  $("adviceBox").replaceChildren();
+  const heading = document.createElement("strong");
+  heading.textContent = mood ? "A little advice for your " + mood.toLowerCase() + " day" : "A little advice for today";
+  const paragraph = document.createElement("p");
+  paragraph.textContent = advice[mood] || "Start with what you can control today. Take one small step, and ask someone you trust for help if things feel overwhelming.";
+  paragraph.style.margin = "8px 0 0";
+  $("adviceBox").append(heading, paragraph);
+  $("adviceBox").classList.remove("hidden");
+
+  state.feeds.unshift({ mood, note:note || "Checked in with myself today.", time:Date.now() });
+  state.feeds = state.feeds.slice(0,8);
+  saveDb();
+  renderFeed();
+});
+
+/* Image compression and camera */
+
+async function compressImage(file) {
+  if (!file || !file.type.startsWith("image/")) throw new Error("Choose a valid image.");
+  if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    await new Promise((resolve,reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error("Couldn't read that image."));
     });
+    const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.naturalWidth,img.naturalHeight));
+    const width = Math.max(1,Math.round(img.naturalWidth*scale));
+    const height = Math.max(1,Math.round(img.naturalHeight*scale));
+    const canvas = $("photoCanvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d",{alpha:false});
+    ctx.drawImage(img,0,0,width,height);
 
-    document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
-      $("squadTab").classList.toggle("hidden", tab !== "squad");
-      $("chatTab").classList.toggle("hidden", tab !== "chat");
-      document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b === btn));
-      if (tab === "chat" && state.activeFriend) state.unread[state.activeFriend] = 0;
-      state.unreadTotal = Object.values(state.unread).reduce((sum, n) => sum + n, 0);
-      renderAll();
-    }));
+    let quality = .78;
+    let data = canvas.toDataURL("image/jpeg",quality);
+    while (data.length > MAX_PHOTO_CHARS && quality > .25) {
+      quality -= .08;
+      data = canvas.toDataURL("image/jpeg",quality);
+    }
+    return {data,width,height};
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+async function usePhotoFile(file) {
+  try {
+    const result = await compressImage(file);
+    state.photoData = result.data;
+    $("photoPreview").src = result.data;
+    $("photoPreview").classList.remove("hidden");
+    $("photoInfo").textContent = result.width + " × " + result.height + "px · compressed JPEG · approximately " + Math.round(result.data.length*.75/1024) + " KB";
+    $("clearPhotoBtn").classList.remove("hidden");
+  } catch (err) {
+    showNotice(err.message || "Could not process that image.", "error");
+  }
+}
+$("photoFile").addEventListener("change", async e => {
+  const file = e.target.files && e.target.files[0];
+  if (file) await usePhotoFile(file);
+  e.target.value = "";
+});
+$("clearPhotoBtn").addEventListener("click", () => {
+  state.photoData = "";
+  $("photoPreview").removeAttribute("src");
+  $("photoPreview").classList.add("hidden");
+  $("photoInfo").textContent = "";
+  $("clearPhotoBtn").classList.add("hidden");
+});
 
-    $("sendMessageBtn").addEventListener("click", sendChatMessage);
-    $("messageInput").addEventListener("keydown", e => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendChatMessage();
-      }
+async function stopCamera() {
+  if (state.cameraStream) {
+    state.cameraStream.getTracks().forEach(track => track.stop());
+    state.cameraStream = null;
+  }
+  $("cameraVideo").srcObject = null;
+  $("cameraVideo").classList.add("hidden");
+  $("captureBtn").classList.add("hidden");
+  $("stopCameraBtn").classList.add("hidden");
+  $("cameraBtn").classList.remove("hidden");
+}
+$("cameraBtn").addEventListener("click", async () => {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showNotice("Camera access requires HTTPS or localhost.", "error");
+    return;
+  }
+  try {
+    state.cameraStream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:"environment"},width:{ideal:640},height:{ideal:480}},
+      audio:false
     });
+    $("cameraVideo").srcObject = state.cameraStream;
+    $("cameraVideo").classList.remove("hidden");
+    $("captureBtn").classList.remove("hidden");
+    $("stopCameraBtn").classList.remove("hidden");
+    $("cameraBtn").classList.add("hidden");
+  } catch (_) {
+    showNotice("Camera permission was denied or the camera is unavailable.", "error");
+  }
+});
+$("stopCameraBtn").addEventListener("click", stopCamera);
+$("captureBtn").addEventListener("click", () => {
+  const video = $("cameraVideo");
+  if (!video.videoWidth || !video.videoHeight) {
+    showNotice("Wait until the camera preview is ready.", "error");
+    return;
+  }
+  const canvas = $("photoCanvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
+  canvas.toBlob(async blob => {
+    if (blob) await usePhotoFile(new File([blob],"classroom-snap.jpg",{type:"image/jpeg"}));
+    stopCamera();
+  },"image/jpeg",.85);
+});
 
-    $("chatPhotoInput").addEventListener("change", async e => {
-      const file = e.target.files && e.target.files[0];
-      if (!file || !state.activeFriend) return;
-      try {
-        const result = await compressImage(file);
-        const conn = state.connections.get(state.activeFriend);
-        if (!conn || !conn.open || !conn.__authorized) {
-          showNotice("Connect to your friend before sending a photo.", "error");
-          return;
-        }
-        const packet = { type: "chat_photo", id: cryptoId(), from: state.name, photo: result.data, time: Date.now() };
-        if (packet.photo.length > 280000) {
-          showNotice("That image is still too large to send. Choose a smaller photo.", "error");
-          return;
-        }
-        if (!sendPacket(conn, packet)) {
-          showNotice("Photo could not be sent. Check the connection.", "error");
-          return;
-        }
-        addHistory(state.activeFriend, { id: packet.id, from: state.name, photo: packet.photo, text: "", time: packet.time });
-      } catch (err) {
-        showNotice(err.message || "Could not process photo.", "error");
-      } finally {
-        e.target.value = "";
-      }
-    });
+/* Compressed photo sharing */
 
-    $("moodPills").addEventListener("click", e => {
-      const btn = e.target.closest("[data-mood]");
-      if (!btn) return;
-      state.selectedMood = btn.dataset.mood;
-      updateMoodUI();
-      saveDb();
-    });
+$("chatPhotoInput").addEventListener("change", async e => {
+  const file = e.target.files && e.target.files[0];
+  const name = state.activeFriend;
+  if (!file || !name) return;
+  try {
+    const result = await compressImage(file);
+    if (result.data.length > MAX_PHOTO_CHARS) {
+      showNotice("This photo is too large to send. Choose a smaller image.", "error");
+      return;
+    }
+    const conn = state.connections.get(name);
+    if (!conn || !conn.open || !conn.__authorized) {
+      showNotice("Connect to your friend before sending a photo.", "error");
+      return;
+    }
+    const packet = { type:"chat_photo", id:newId(), from:state.name, photo:result.data, time:Date.now() };
+    if (!sendPacket(conn,packet)) {
+      showNotice("Photo could not be sent. Check the connection.", "error");
+      return;
+    }
+    addHistory(name,{id:packet.id,from:state.name,photo:packet.photo,text:"",time:packet.time});
+  } catch (err) {
+    showNotice(err.message || "Could not process photo.", "error");
+  } finally {
+    e.target.value = "";
+  }
+});
 
-    $("adviceBtn").addEventListener("click", () => {
-      const mood = state.selectedMood;
-      const note = $("ventBox").value.trim();
-      const advice = {
-        Happy: "Enjoy the good moment. What made today better? You could write it down or share the good news with someone you trust.",
-        Okay: "An okay day still counts. Pick one small thing you can finish, then give yourself permission to rest.",
-        Tired: "Try a short break, some water, and a snack if you need one. You don't have to solve everything while you're exhausted.",
-        Stressed: "Pause and take a few comfortable, slow breaths. Break the next task into one tiny step. If school pressure feels too big, talk with a trusted adult or teacher.",
-        Sad: "You don't have to force yourself to feel cheerful. Try naming what you need right now, and consider reaching out to someone kind and trustworthy.",
-        Excited: "That's great energy! Choose one thing you want to enjoy or work toward, and let yourself celebrate the progress."
-      };
-      const box = $("adviceBox");
-      box.innerHTML = "";
-      const heading = document.createElement("strong");
-      heading.textContent = mood ? "A little advice for your " + mood.toLowerCase() + " day" : "A little advice for today";
-      const para = document.createElement("p");
-      para.textContent = advice[mood] || "Start with what you can control today. Take one small step, and ask someone you trust for help if things feel overwhelming.";
-      para.style.margin = "8px 0 0";
-      box.append(heading, para);
-      box.classList.remove("hidden");
-      addVibe(mood, note);
-    });
+$("copyIdBtn").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(state.peerId);
+    showNotice("Peer ID copied.", "success");
+  } catch (_) {
+    showNotice("Clipboard access unavailable. Copy the Peer ID displayed on screen.", "error");
+  }
+});
 
-    $("photoFile").addEventListener("change", async e => {
-      const file = e.target.files && e.target.files[0];
-      if (file) await usePhotoFile(file);
-      e.target.value = "";
-    });
+window.addEventListener("online", () => {
+  if (state.peer && state.peer.disconnected) {
+    try { state.peer.reconnect(); } catch (_) {}
+  }
+});
+window.addEventListener("offline", () => setStatus("Internet offline","error"));
+window.addEventListener("beforeunload", () => {
+  if (state.cameraStream) state.cameraStream.getTracks().forEach(track => track.stop());
+});
 
-    $("cameraBtn").addEventListener("click", async () => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showNotice("Camera access requires HTTPS or localhost and a supported browser.", "error");
-        return;
-      }
-      try {
-        state.cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } },
-          audio: false
-        });
-        $("cameraVideo").srcObject = state.cameraStream;
-        $("cameraVideo").classList.remove("hidden");
-        $("captureBtn").classList.remove("hidden");
-        $("stopCameraBtn").classList.remove("hidden");
-        $("cameraBtn").classList.add("hidden");
-      } catch (_) {
-        showNotice("Camera permission was denied or the camera is unavailable.", "error");
-      }
-    });
-
-    $("captureBtn").addEventListener("click", async () => {
-      const video = $("cameraVideo");
-      if (!video.videoWidth || !video.videoHeight) {
-        showNotice("Wait until the camera preview is ready.", "error");
-        return;
-      }
-      const canvas = $("photoCanvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d").drawImage(video, 0, 0);
-      canvas.toBlob(async blob => {
-        if (blob) await usePhotoFile(new File([blob], "classroom-snap.jpg", { type: "image/jpeg" }));
-        stopCamera();
-      }, "image/jpeg", .85);
-    });
-    $("stopCameraBtn").addEventListener("click", stopCamera);
-
-    $("clearPhotoBtn").addEventListener("click", () => {
-      state.photoData = "";
-      $("photoPreview").removeAttribute("src");
-      $("photoPreview").classList.add("hidden");
-      $("photoInfo").textContent = "";
-      $("clearPhotoBtn").classList.add("hidden");
-    });
-
-    // Keep unread counts consistent and prevent stale notifications from growing indefinitely.
-    window.addEventListener("online", () => {
-      if (state.peer && state.peer.disconnected) {
-        try { state.peer.reconnect(); } catch (_) {}
-      }
-    });
-    window.addEventListener("offline", () => {
-      setStatus("Internet offline", "error");
-    });
-    window.addEventListener("beforeunload", stopCamera);
-
-    // Track incoming channels for accepting requests even before identity is fully mapped.
-    const originalRegisterConnection = registerConnection;
-    // The incoming connection is registered as soon as PeerJS emits "connection".
-    // The hello packet maps the remote name after the data channel opens.
-    // pendingIncoming is intentionally populated in handlePacket on friend requests.
-
-    // Patch the friend-request branch's storage path by using the known open connection.
-    // This also lets the Accept button use the exact channel on which the request arrived.
-    const _handlePacket = handlePacket;
-    // All incoming channels are mapped to their verified username after hello.
-    // Store connection references for friend requests with this wrapper.
-    // (The data handler calls handlePacket dynamically.)
-    handlePacket = function(conn, packet) {
-      if (packet && packet.type === "friend_request" && validName(cleanName(packet.from))) {
-        state.pendingIncoming.set(cleanName(packet.from), conn);
-      }
-      return _handlePacket(conn, packet);
-    };
-
-    // Do not start a fake peer or populate placeholder users; the user chooses a real name.
-  </script>
+/* Do not silently restore a logged-in session after a page reload.
+   The user must enter their password again. */
+try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+setAuthMode("login");
+</script>
 </body>
 </html>
