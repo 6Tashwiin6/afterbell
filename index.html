@@ -1,629 +1,1193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AfterBell: Student Mood & Squad Hub</title>
-<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-<style>
-:root{
-  --bg:#0f172a; --card:#1e293b; --card2:#273449; --line:#334155; --text:#e2e8f0; --muted:#94a3b8;
-  --grad:linear-gradient(135deg,#8b5cf6,#3b82f6); --purple:#8b5cf6; --blue:#3b82f6; --green:#22c55e; --red:#ef4444; --amber:#f59e0b;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100%}
-button,input,textarea{font:inherit;color:inherit}
-[hidden]{display:none!important}
-.wrap{max-width:900px;margin:0 auto;padding:0 14px 40px}
-header{position:sticky;top:0;z-index:20;background:rgba(15,23,42,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
-.hbar{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 14px;flex-wrap:wrap}
-.logo{font-weight:800;font-size:1.25rem;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.3px}
-.spacer{flex:1}
-.status{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted);background:var(--card);padding:5px 10px;border-radius:99px;border:1px solid var(--line)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)}
-.dot.ok{background:var(--green);box-shadow:0 0 10px var(--green)}
-.dot.wait{background:var(--amber);box-shadow:0 0 8px var(--amber)}
-.userchip{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px 6px 4px 4px;font-size:.85rem}
-.avatar{width:28px;height:28px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:.8rem;color:#fff;flex:none}
-.avatar.lg{width:38px;height:38px;font-size:1rem}
-.linkbtn{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.75rem;padding:4px 8px;border-radius:99px}
-.linkbtn:hover{color:#fff;background:var(--card2)}
-nav.tabs{max-width:900px;margin:0 auto;display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto}
-.tabbtn{flex:1;min-width:84px;position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;cursor:pointer;font-weight:600;font-size:.88rem;color:var(--muted);white-space:nowrap}
-.tabbtn.active{background:var(--grad);color:#fff;border-color:transparent}
-.badge{position:absolute;top:-6px;right:-4px;background:var(--red);color:#fff;border-radius:99px;font-size:.7rem;min-width:19px;height:19px;display:grid;place-items:center;padding:0 5px;font-weight:700;box-shadow:0 0 0 2px var(--bg)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
-.card h2{margin:0 0 4px;font-size:1.1rem}
-.card h3{margin:14px 0 8px;font-size:.95rem;color:#cbd5e1}
-.sub{color:var(--muted);font-size:.85rem;margin:0 0 12px}
-.btn{background:var(--grad);border:0;color:#fff;font-weight:700;padding:10px 16px;border-radius:12px;cursor:pointer}
-.btn:hover{filter:brightness(1.1)}.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn.ghost{background:var(--card2);border:1px solid var(--line);font-weight:600;padding:8px 12px;font-size:.85rem}
-.btn.sm{padding:6px 12px;font-size:.8rem;border-radius:10px}
-.btn.red{background:#7f1d1d}
-.btn.green{background:#15803d}
-input[type=text],input[type=password],textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:none}
-input:focus,textarea:focus{border-color:var(--purple)}
-textarea{resize:vertical;min-height:100px}
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:8px 14px;cursor:pointer;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
-.pill:hover{border-color:var(--purple)}
-.pill.sel{background:var(--grad);border-color:transparent;color:#fff;font-weight:600}
-.pill .mini{width:8px;height:8px;border-radius:50%;background:#64748b}
-.pill .mini.on{background:var(--green);box-shadow:0 0 6px var(--green)}
-.row{display:flex;gap:8px;align-items:center}
-.row.wrap2{flex-wrap:wrap}
-.advice{background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(59,130,246,.15));border:1px solid rgba(139,92,246,.4);border-radius:14px;padding:14px;margin-top:12px;line-height:1.5}
-.advice.care{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.5)}
-.advice ul{margin:6px 0 0;padding-left:20px}
-.advice .micro{margin-top:10px;font-weight:600}
-.snapbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
-.thumb{position:relative;display:inline-block}
-.thumb img{height:54px;border-radius:10px;display:block;border:1px solid var(--line)}
-.thumb button{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;border:0;background:var(--red);color:#fff;cursor:pointer;font-size:.7rem;line-height:1}
-.post{display:flex;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
-.post:first-child{border-top:0}
-.post .body{flex:1;min-width:0}
-.post .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85rem}
-.post .meta b{font-size:.95rem}
-.chip{background:var(--card2);border-radius:99px;padding:2px 9px;font-size:.78rem}
-.time{color:var(--muted);font-size:.75rem}
-.post p{margin:6px 0 0;word-wrap:break-word;overflow-wrap:anywhere}
-.post img.pic,.bubble img{max-width:100%;width:260px;border-radius:12px;margin-top:8px;display:block;cursor:zoom-in}
-.list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.list-item:first-child{border-top:0}
-.list-item .grow{flex:1;min-width:0}
-.list-item .prev{color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.empty{color:var(--muted);text-align:center;padding:18px 8px;font-size:.9rem}
-.chatgrid{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:800px){.chatgrid{grid-template-columns:280px 1fr}.chatgrid .backbtn{display:none}}
-@media(max-width:799px){.chatgrid.inconv #chatListCard{display:none}.chatgrid:not(.inconv) #chatPaneCard{display:none}}
-#chatPaneCard{display:flex;flex-direction:column;height:calc(100vh - 230px);min-height:380px;padding:0;overflow:hidden}
-.chathead{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
-#msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
-.bubble{max-width:80%;padding:9px 12px;border-radius:16px;background:var(--card2);align-self:flex-start;overflow-wrap:anywhere}
-.bubble.me{align-self:flex-end;background:var(--grad);color:#fff}
-.bubble .t{display:block;font-size:.68rem;opacity:.7;margin-top:3px}
-.composer{border-top:1px solid var(--line);padding:10px 12px}
-.overlay{position:fixed;inset:0;background:var(--bg);z-index:50;display:grid;place-items:center;padding:20px;overflow:auto}
-.welcome{width:100%;max-width:400px;text-align:center}
-.welcome .big{font-size:2.4rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.err{color:#fca5a5;font-size:.85rem;min-height:1.2em;margin-top:8px}
-.modal{position:fixed;inset:0;background:rgba(2,6,23,.88);z-index:60;display:grid;place-items:center;padding:16px}
-.modal .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;max-width:420px;width:100%;text-align:center}
-.modal video{width:100%;border-radius:12px;background:#000;transform:scaleX(-1)}
-#lightbox img{max-width:95vw;max-height:90vh;border-radius:12px}
-#toasts{position:fixed;top:calc(80px + env(safe-area-inset-top));right:12px;left:12px;z-index:80;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
-.toast{background:var(--card);border:1px solid var(--purple);border-left:4px solid var(--purple);border-radius:12px;padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:340px;font-size:.88rem;animation:in .25s ease;pointer-events:auto}
-@keyframes in{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
-.note{font-size:.75rem;color:var(--muted);margin-top:10px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="AfterBell — a student mood, advice, and squad chat hub.">
+  <title>AfterBell: Student Mood &amp; Squad Hub</title>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card2: #263449;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --purple: #a78bfa;
+      --blue: #60a5fa;
+      --green: #4ade80;
+      --red: #fb7185;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--blue); outline-offset: 3px;
+    }
+    .hidden { display: none !important; }
+    .gradient {
+      background: linear-gradient(110deg, #a78bfa, #60a5fa);
+      color: #0b1120; border: 0; font-weight: 800;
+    }
+    .btn {
+      border: 1px solid var(--border); border-radius: 11px; padding: 10px 14px;
+      color: var(--text); background: var(--card2); transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.gradient { background: linear-gradient(110deg, #a78bfa, #60a5fa); color: #0b1120; }
+    .btn.green { background: #14532d; border-color: #166534; color: #bbf7d0; }
+    .btn.red { background: #4c1725; border-color: #9f1239; color: #fecdd3; }
+    input, textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 11px;
+      padding: 12px; color: var(--text); background: #111c30;
+    }
+    textarea { resize: vertical; min-height: 100px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .wrap { max-width: 1060px; width: calc(100% - 28px); margin: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 5; background: #0f172af2;
+      backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
+    }
+    .top-inner {
+      max-width: 1060px; width: calc(100% - 28px); margin: auto;
+      min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand { font-size: 21px; font-weight: 900; letter-spacing: -.7px; }
+    .brand span { color: var(--purple); }
+    .status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+    .dot { height: 9px; width: 9px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
+    .dot.online { background: var(--green); box-shadow: 0 0 12px #4ade8066; }
+    .dot.error { background: var(--red); }
+    main { padding: 28px 0 50px; }
+    .welcome {
+      max-width: 500px; margin: 7vh auto; padding: 28px;
+      border: 1px solid var(--border); border-radius: 22px;
+      background: radial-gradient(ellipse at top right, #4c1d9540, transparent 60%), var(--card);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(28px, 5vw, 43px); line-height: 1.15; letter-spacing: -1px; }
+    h2 { font-size: 21px; }
+    h3 { font-size: 16px; }
+    .brand-icon {
+      display: grid; place-items: center; width: 49px; height: 49px; border-radius: 15px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa); color: #0f172a;
+      font-size: 25px; margin-bottom: 20px;
+    }
+    .stack { display: grid; gap: 12px; }
+    .row { display: flex; align-items: center; gap: 9px; }
+    .row > input { min-width: 0; }
+    .row .btn { flex-shrink: 0; }
+    .card {
+      padding: 20px; border: 1px solid var(--border); border-radius: 17px;
+      background: var(--card); min-width: 0;
+    }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 16px; }
+    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .section-title h2, .section-title h3 { margin: 0; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .pill {
+      border: 1px solid var(--border); background: #111c30; color: var(--text);
+      border-radius: 999px; padding: 8px 12px;
+    }
+    .pill.selected { border-color: var(--purple); background: #6d28d933; color: #ddd6fe; }
+    .advice {
+      padding: 14px; border-radius: 12px; border: 1px solid #8b5cf644;
+      background: #7c3aed14; margin-top: 12px;
+    }
+    .feed-item { padding: 12px 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+    .feed-item:last-child { border-bottom: 0; }
+    .tabs { display: flex; gap: 8px; margin: 22px 0 16px; border-bottom: 1px solid var(--border); }
+    .tab {
+      position: relative; border: 0; border-bottom: 2px solid transparent;
+      color: var(--muted); background: transparent; padding: 12px 15px;
+    }
+    .tab.active { color: var(--text); border-bottom-color: var(--purple); }
+    .count {
+      display: inline-grid; place-items: center; min-width: 19px; height: 19px;
+      margin-left: 5px; border-radius: 99px; padding: 0 5px;
+      color: #0f172a; background: var(--purple); font-size: 11px; font-weight: 900;
+    }
+    .list { display: grid; gap: 10px; }
+    .list-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      border: 1px solid var(--border); border-radius: 12px; padding: 13px;
+      background: #111c30; min-width: 0;
+    }
+    .list-item > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+    .actions { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chat-layout { display: grid; grid-template-columns: minmax(175px, .7fr) minmax(0, 1.5fr); gap: 14px; }
+    .friend-choice { width: 100%; text-align: left; margin-bottom: 7px; overflow-wrap: anywhere; }
+    .friend-choice.active { border-color: var(--purple); background: #6d28d933; }
+    .chat-box {
+      display: flex; flex-direction: column; min-height: 360px; border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; background: #111c30; min-width: 0;
+    }
+    .chat-head { padding: 13px; border-bottom: 1px solid var(--border); font-weight: 800; }
+    .messages { display: flex; flex-direction: column; gap: 10px; padding: 14px; flex: 1; min-height: 220px; max-height: 420px; overflow-y: auto; }
+    .bubble { max-width: 85%; padding: 10px 12px; border-radius: 13px; background: #263449; overflow-wrap: anywhere; align-self: flex-start; }
+    .bubble.mine { align-self: flex-end; background: #4c1d95; }
+    .bubble img { display: block; max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 5px; }
+    .composer { padding: 12px; border-top: 1px solid var(--border); display: grid; gap: 9px; }
+    .composer textarea { min-height: 64px; }
+    .empty { color: var(--muted); text-align: center; padding: 25px 10px; }
+    .notice {
+      border: 1px solid var(--border); background: #172338; padding: 12px 14px;
+      border-radius: 12px; margin-bottom: 14px; overflow-wrap: anywhere;
+    }
+    .notice.success { border-color: #166534; color: #bbf7d0; }
+    .notice.error { border-color: #9f1239; color: #fecdd3; }
+    .photo-preview { width: 100%; max-height: 240px; object-fit: contain; background: #111c30; border-radius: 12px; }
+    .footer { text-align: center; margin-top: 25px; font-size: 12px; color: var(--muted); }
+    @media (max-width: 700px) {
+      .grid, .chat-layout { grid-template-columns: 1fr; }
+      .top-inner { align-items: flex-start; padding: 12px 0; }
+      .brand { font-size: 19px; }
+      .status { max-width: 150px; }
+      .card { padding: 15px; }
+      .welcome { padding: 22px; }
+      .list-item { align-items: flex-start; flex-direction: column; }
+      .actions { width: 100%; }
+    }
+  </style>
 </head>
 <body>
-
-<!-- WELCOME -->
-<div id="welcome" class="overlay">
-  <div class="welcome">
-    <div class="big">AfterBell 🔔</div>
-    <p class="sub" style="margin:6px 0 20px">Student Mood &amp; Squad Hub — decompress after school, find your squad.</p>
-    <div class="card" style="margin:0;text-align:left">
-      <h2>Enter Your Name</h2>
-      <p class="sub">Returning? Type the same name (and PIN) to log back in.</p>
-      <input id="nameIn" type="text" maxlength="20" placeholder="Your name (letters, numbers, _ )" autocomplete="off">
-      <div style="height:8px"></div>
-      <input id="pinIn" type="password" inputmode="numeric" maxlength="8" placeholder="Optional PIN (protects your name)" autocomplete="off">
-      <div class="err" id="welcomeErr"></div>
-      <button class="btn" id="joinBtn" style="width:100%;margin-top:6px">Join AfterBell →</button>
-      <p class="note">Names and posts are public to everyone on AfterBell. Don't share personal details like your address or phone number.</p>
+  <header class="topbar">
+    <div class="top-inner">
+      <div class="brand">After<span>Bell</span> <span style="color:#94a3b8;font-size:12px;letter-spacing:0">STUDENT HUB</span></div>
+      <div class="status" aria-live="polite">
+        <span id="statusDot" class="dot"></span>
+        <span id="statusText">Offline · Enter your name</span>
+      </div>
     </div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app" hidden>
-  <header>
-    <div class="hbar">
-      <span class="logo">AfterBell 🔔</span>
-      <span class="status"><span class="dot" id="dot"></span><span id="statusTxt">Connecting…</span></span>
-      <span class="spacer"></span>
-      <span class="userchip"><span class="avatar" id="meAv">?</span><b id="meName"></b><button class="linkbtn" id="logoutBtn">Switch Account / Log Out</button></span>
-    </div>
-    <nav class="tabs">
-      <button class="tabbtn active" data-tab="mood">😊 Feelings</button>
-      <button class="tabbtn" data-tab="feed">🌈 Vibe Feed</button>
-      <button class="tabbtn" data-tab="squad">👥 Squad<span class="badge" id="bSquad" hidden>0</span></button>
-      <button class="tabbtn" data-tab="chat">💬 Chat<span class="badge" id="bChat" hidden>0</span></button>
-    </nav>
   </header>
 
-  <div class="wrap">
-    <!-- MOOD -->
-    <section id="tab-mood" class="tab">
-      <div class="card">
-        <h2>How are you feeling after school?</h2>
-        <p class="sub">Pick a mood. Venting stays private on your device unless you choose to share a vibe.</p>
-        <div class="pills" id="moodPills"></div>
-        <h3>Vent box (private)</h3>
-        <textarea id="vent" maxlength="600" placeholder="What happened today? Say anything — nobody else can see this box."></textarea>
-        <div class="row" style="margin-top:10px"><button class="btn" id="adviceBtn">Get advice 💡</button></div>
-        <div id="adviceOut"></div>
-      </div>
-      <div class="card">
-        <h2>Share to the Daily Vibe Feed</h2>
-        <p class="sub">Posts your selected mood publicly with an optional caption and Classroom Snap.</p>
-        <input id="caption" type="text" maxlength="200" placeholder="Short caption (optional)">
-        <div class="snapbar" data-ctx="feed">
-          <button class="btn ghost" data-act="cam">📷 Classroom Snap</button>
-          <button class="btn ghost" data-act="upload">🖼️ Upload photo</button>
-          <span class="thumb" hidden><img alt="snap preview"><button data-act="rm" title="Remove">✕</button></span>
+  <main class="wrap">
+    <section id="welcomeScreen" class="welcome">
+      <div class="brand-icon">✦</div>
+      <p class="muted" style="font-weight:800;text-transform:uppercase;letter-spacing:2px;font-size:11px">Your space after the bell</p>
+      <h1>School days are a lot.<br><span style="color:#a78bfa">You don't have to figure it all out alone.</span></h1>
+      <p class="muted">Check in with yourself, get a little advice, and connect with people you know.</p>
+      <form id="welcomeForm" class="stack">
+        <label for="nameInput">Choose your username</label>
+        <input id="nameInput" maxlength="24" autocomplete="nickname" placeholder="e.g. Rook" required>
+        <button class="btn gradient" type="submit">Enter AfterBell →</button>
+      </form>
+      <p class="small muted" style="margin:15px 0 0">Your username determines your public PeerJS ID. Use a nickname, not your full name or other personal details.</p>
+    </section>
+
+    <section id="appScreen" class="hidden">
+      <div id="globalNotice" class="notice hidden" role="status" aria-live="polite"></div>
+      <div class="section-title">
+        <div>
+          <p class="muted small" style="margin-bottom:4px">WELCOME BACK</p>
+          <h2 style="margin:0">Hey, <span id="displayName"></span> ✨</h2>
         </div>
-        <div class="row" style="margin-top:12px"><button class="btn" id="postBtn">Post my vibe 🚀</button><span class="err" id="postErr" style="margin:0"></span></div>
+        <button id="changeNameBtn" class="btn" type="button">Change name</button>
       </div>
-    </section>
 
-    <!-- FEED -->
-    <section id="tab-feed" class="tab" hidden>
-      <div class="card"><h2>🌈 Daily Vibe Feed</h2><p class="sub">Live from students everywhere. Be kind.</p><div id="feedList"></div></div>
-    </section>
+      <div class="grid">
+        <section class="card">
+          <div class="section-title"><h2>After-School Feelings &amp; Advice</h2><span>🌤️</span></div>
+          <p class="muted">How's your day actually going?</p>
+          <div id="moodPills" class="pill-row">
+            <button class="pill" data-mood="Happy" type="button">😊 Happy</button>
+            <button class="pill" data-mood="Okay" type="button">🙂 Okay</button>
+            <button class="pill" data-mood="Tired" type="button">😴 Tired</button>
+            <button class="pill" data-mood="Stressed" type="button">😵 Stressed</button>
+            <button class="pill" data-mood="Sad" type="button">🌧️ Sad</button>
+            <button class="pill" data-mood="Excited" type="button">⚡ Excited</button>
+          </div>
+          <label for="ventBox">Want to get something off your chest?</label>
+          <textarea id="ventBox" maxlength="1200" placeholder="Write it out. You don't have to make it sound perfect..."></textarea>
+          <div class="row" style="justify-content:space-between;margin-top:12px;flex-wrap:wrap">
+            <span class="small muted">Private on this device until you share it.</span>
+            <button id="adviceBtn" class="btn gradient" type="button">Get advice ✨</button>
+          </div>
+          <div id="adviceBox" class="advice hidden" aria-live="polite"></div>
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+            <h3>Daily Vibe Feed</h3>
+            <p class="small muted">Only your own check-ins appear here. Nothing is posted publicly automatically.</p>
+            <div id="vibeFeed"><div class="empty">Your first vibe starts here.</div></div>
+          </div>
+        </section>
 
-    <!-- SQUAD -->
-    <section id="tab-squad" class="tab" hidden>
-      <div class="card">
-        <h2>Add a friend</h2>
-        <p class="sub">Type their exact AfterBell name, or tap someone below.</p>
-        <div class="row"><input id="friendIn" type="text" maxlength="20" placeholder="Friend's name"><button class="btn" id="sendReqBtn">Send</button></div>
-        <div class="err" id="friendErr"></div>
-        <h3>Recently Active Users</h3>
-        <div class="pills" id="recentPills"></div>
+        <div class="stack">
+          <section class="card">
+            <div class="section-title"><h2>Optional Classroom Snap</h2><span>📸</span></div>
+            <p class="muted small">Capture a moment or choose a photo. Images are resized to a maximum 350px JPEG before sending.</p>
+            <div class="stack">
+              <label for="photoFile">Choose an image</label>
+              <input id="photoFile" type="file" accept="image/*">
+              <button id="cameraBtn" class="btn" type="button">Open camera</button>
+              <video id="cameraVideo" class="photo-preview hidden" autoplay playsinline muted></video>
+              <div class="row">
+                <button id="captureBtn" class="btn hidden" type="button">Capture photo</button>
+                <button id="stopCameraBtn" class="btn hidden" type="button">Close camera</button>
+              </div>
+              <canvas id="photoCanvas" class="hidden"></canvas>
+              <img id="photoPreview" class="photo-preview hidden" alt="Compressed photo preview">
+              <p id="photoInfo" class="small muted"></p>
+              <button id="clearPhotoBtn" class="btn hidden" type="button">Remove photo</button>
+            </div>
+          </section>
+          <section class="card">
+            <div class="section-title"><h2>Connection details</h2><span>🔗</span></div>
+            <p class="small muted">Share your username with a friend so they can send you a request.</p>
+            <div class="small muted">Your Peer ID</div>
+            <p id="peerIdLabel" style="overflow-wrap:anywhere;font-weight:700">Connecting…</p>
+            <button id="copyIdBtn" class="btn" type="button">Copy Peer ID</button>
+            <p class="small muted" style="margin:12px 0 0">Both devices need internet access, this page open, and access to the PeerJS signaling service. Use HTTPS or localhost.</p>
+          </section>
+        </div>
       </div>
-      <div class="card"><h2>Friend requests</h2><div id="incoming"></div><h3>Sent</h3><div id="outgoing"></div></div>
-      <div class="card"><h2>My squad</h2><div id="friendsList"></div></div>
-    </section>
 
-    <!-- CHAT -->
-    <section id="tab-chat" class="tab" hidden>
-      <div class="chatgrid" id="chatGrid">
-        <div class="card" id="chatListCard" style="margin-top:14px"><h2>Chats</h2><div id="chatList"></div></div>
-        <div class="card" id="chatPaneCard">
-          <div class="chathead"><button class="btn ghost sm backbtn" id="backBtn">← Back</button><span class="avatar" id="cAv"></span><b id="cName">Select a friend</b></div>
-          <div id="msgs"></div>
-          <div class="composer" id="composer" hidden>
-            <div class="row"><input id="msgIn" type="text" maxlength="500" placeholder="Type a message…" autocomplete="off"><button class="btn" id="sendMsgBtn">Send</button></div>
-            <div class="snapbar" data-ctx="chat">
-              <button class="btn ghost sm" data-act="cam">📷 Snap</button>
-              <button class="btn ghost sm" data-act="upload">🖼️ Photo</button>
-              <span class="thumb" hidden><img alt="snap preview"><button data-act="rm" title="Remove">✕</button></span>
+      <nav class="tabs" aria-label="Squad and chat tabs">
+        <button class="tab active" data-tab="squad" type="button">Squad <span id="requestBadge" class="count hidden">0</span></button>
+        <button class="tab" data-tab="chat" type="button">Chat <span id="chatBadge" class="count hidden">0</span></button>
+      </nav>
+
+      <section id="squadTab" class="card">
+        <div class="section-title"><h2>Your Squad</h2><span>👥</span></div>
+        <form id="addFriendForm" class="row" style="margin-bottom:18px">
+          <input id="friendNameInput" maxlength="24" placeholder="Friend's exact username" autocomplete="off" required>
+          <button class="btn gradient" type="submit">Send</button>
+        </form>
+        <p class="small muted">Requests are delivered directly to the recipient's currently open PeerJS connection. A username must be unique to one person.</p>
+        <h3 style="margin-top:22px">Friend requests <span id="requestCount" class="muted"></span></h3>
+        <div id="requestList" class="list"><div class="empty">No friend requests yet.</div></div>
+        <h3 style="margin-top:22px">Squad members</h3>
+        <div id="squadList" class="list"><div class="empty">Your squad is waiting for friends.</div></div>
+        <h3 style="margin-top:22px">Notifications</h3>
+        <div id="notificationList" class="list"><div class="empty">You're all caught up.</div></div>
+      </section>
+
+      <section id="chatTab" class="card hidden">
+        <div class="section-title"><h2>1-on-1 Chat</h2><span>💬</span></div>
+        <p class="small muted">Messages and photos are sent over the direct PeerJS data connection. A disconnected friend must reconnect before offline messages can be delivered.</p>
+        <div class="chat-layout">
+          <div>
+            <h3>Your Squad</h3>
+            <div id="chatFriendList"><div class="empty">Accept a friend request to start chatting.</div></div>
+          </div>
+          <div class="chat-box">
+            <div id="chatHeader" class="chat-head">Choose a squad member</div>
+            <div id="messageList" class="messages"><div class="empty">Your conversation will appear here.</div></div>
+            <div class="composer">
+              <textarea id="messageInput" maxlength="3000" placeholder="Write a message…" disabled></textarea>
+              <div class="row">
+                <label class="btn" for="chatPhotoInput" style="display:inline-block;cursor:pointer">Attach photo</label>
+                <input id="chatPhotoInput" class="hidden" type="file" accept="image/*">
+                <button id="sendMessageBtn" class="btn gradient" type="button" disabled>Send ↗</button>
+              </div>
+              <p id="chatStatus" class="small muted" style="margin:0">Choose a friend to begin.</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+      <p class="footer">AfterBell · Be kind to yourself and your squad. Never share passwords, private school details, or photos without permission.</p>
     </section>
-  </div>
-</div>
+  </main>
 
-<input type="file" id="fileIn" accept="image/*" hidden>
+  <script>
+    "use strict";
 
-<div class="modal" id="camModal" hidden>
-  <div class="box">
-    <video id="vid" autoplay playsinline muted></video>
-    <p class="sub" id="camMsg" style="margin:8px 0"></p>
-    <div class="row" style="justify-content:center;flex-wrap:wrap">
-      <button class="btn" id="snapBtn">📸 Capture</button>
-      <button class="btn ghost" id="flipBtn">🔄 Flip</button>
-      <button class="btn ghost" id="camCancel">Cancel</button>
-    </div>
-  </div>
-</div>
-<div class="modal" id="lightbox" hidden><img alt="full size"></div>
-<div id="toasts"></div>
+    /*
+      PeerJS implementation notes:
+      - Deterministic IDs allow a known username to be dialled directly.
+      - Peer IDs are public identifiers, NOT authentication.
+      - Public PeerJS signaling and public STUN servers cannot guarantee
+        100% availability, privacy, or connectivity through every firewall.
+      - The recipient must have the page open and PeerJS connected.
+      - LocalStorage is per browser/device; friend lists are synchronized
+        by messages, not shared storage.
+      - For a real deployment, add server-side identity verification,
+        rate limits, moderation, and a trusted signaling/relay service.
+    */
 
-<script>
-/* ============ CONFIG & GUN ============ */
-const ROOM = 'afterbell_global_live_v2_88412';
-const PEERS = ['https://peer.wallie.io/gun','https://relay.peer.ooo/gun','https://gun-manhattan.herokuapp.com/gun'];
-const gun = Gun({ peers: PEERS });
-const root = gun.get(ROOM);
-const gUsers = root.get('users'), gReqs = root.get('requests'), gFeed = root.get('feed'), gChats = root.get('chats');
+    const PREFIX = "afterbell_pg_";
+    const DB_KEY = "afterbell_state_v1";
+    const MAX_IMAGE_SIDE = 350;
+    const MAX_IMAGE_BYTES = 180000;
+    const MAX_HISTORY = 100;
+    const MAX_NOTIFICATIONS = 60;
 
-/* ============ HELPERS ============ */
-const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeImg = s => (typeof s === 'string' && s.startsWith('data:image/jpeg;base64,') && s.length < 400000 && !/["'<>\s]/.test(s)) ? s : '';
-const ini = n => (n || '?').trim().charAt(0).toUpperCase();
-const pairKey = (a, b) => [a, b].sort().join('|');
-function ago(ts){
-  const s = Math.max(0, (Date.now() - ts) / 1000);
-  if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago'; return Math.floor(s/86400) + 'd ago';
-}
-function clock(ts){ return new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-function toast(html){
-  const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = html;
-  $('#toasts').appendChild(t); setTimeout(() => t.remove(), 5500);
-}
-async function hashPin(p){
-  if (!p) return '';
-  try {
-    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ab:' + p));
-    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
-  } catch(e){ let h = 5381; for (const c of 'ab:' + p) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return 'x' + h; }
-}
-const store = {
-  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
-  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
-  del(k){ try { localStorage.removeItem(k); } catch(e){} }
-};
-
-/* ============ STATE ============ */
-let me = null, ready = false, activeTab = 'mood', activeChat = null, selMood = null;
-const users = {}, reqs = {}, feed = {}, chats = {}, subscribed = {};
-let lastRead = store.get('afterbell_read', {});
-const snaps = { feed: null, chat: null };
-
-/* ============ CONNECTION STATUS ============ */
-let peerCount = 0; const bootTime = Date.now();
-gun.on('hi', () => { peerCount++; updStatus(); });
-gun.on('bye', () => { peerCount = Math.max(0, peerCount - 1); updStatus(); });
-function updStatus(){
-  const d = $('#dot'), t = $('#statusTxt');
-  if (!navigator.onLine){ d.className = 'dot'; t.textContent = 'Offline'; return; }
-  if (peerCount > 0){ d.className = 'dot ok'; t.textContent = 'Connected to Live Cloud'; }
-  else if (Date.now() - bootTime < 7000){ d.className = 'dot wait'; t.textContent = 'Connecting…'; }
-  else { d.className = 'dot'; t.textContent = 'No relay reachable — retrying'; }
-}
-setInterval(updStatus, 2000);
-addEventListener('online', updStatus); addEventListener('offline', updStatus);
-
-/* ============ MOODS & ADVICE ============ */
-const MOODS = {
-  happy:{e:'😄',l:'Happy',adv:['Love that for you! Ride the good energy and do something with it.','A good day deserves to be shared. Tell a friend what made it great.','Bottle this feeling. Write down what went well so you can re-read it on tough days.'],micro:'Text one person something kind today.'},
-  excited:{e:'🤩',l:'Excited',adv:['Channel that buzz into planning the next step so it doesn\'t fizzle.','Excitement is energy. Burn some off with a walk or music before homework.','Share the news with your squad, since good news is better with company.'],micro:'Write down your top 3 things to look forward to.'},
-  calm:{e:'😌',l:'Calm',adv:['Nice. A calm mind is great for getting a bit of work done or just enjoying the quiet.','Use this peaceful moment to plan tomorrow in 5 minutes. Future you will say thanks.','Protect this feeling by keeping your evening simple and screen-light.'],micro:'Take 3 slow breaths and notice how good that feels.'},
-  tired:{e:'😴',l:'Tired',adv:['Your body is asking for a break. Eat something, drink water, and rest for 15 minutes first.','Do the smallest homework task first and leave the rest for after a proper rest.','Aim for an earlier bedtime tonight. Sleep fixes more than we give it credit for.'],micro:'Put your phone down and stretch for 2 minutes.'},
-  bored:{e:'😐',l:'Bored',adv:['Boredom is a sign you need something new. Try a 10-minute challenge like drawing, a playlist, or a short workout.','Message a friend and start a mini game or a "this or that" chat.','Learn one weird fact today and share it in the feed.'],micro:'Pick one thing you\'ve been putting off and do just 5 minutes.'},
-  stressed:{e:'😰',l:'Stressed',adv:['Stress shrinks when you break things into small steps. Write the list, then pick only ONE thing.','You don\'t have to do it all tonight. Decide what truly matters for tomorrow and park the rest.','Take a short break, move your body, then come back. Your brain works better after a reset.'],micro:'Try box breathing: in 4, hold 4, out 4, hold 4. Repeat 4 times.'},
-  anxious:{e:'😟',l:'Anxious',adv:['Anxious thoughts feel like facts but they\'re usually "what ifs". Ask yourself what\'s actually true right now.','Ground yourself: name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste.','Talk it out with someone you trust. Saying it aloud makes it smaller.'],micro:'Name 5 things you can see right now. Slowly.'},
-  sad:{e:'😢',l:'Sad',adv:['It\'s okay to feel sad. You don\'t have to fix it right now, just be gentle with yourself.','Reach out to someone you trust, even with a simple "today was rough".','Do one comforting thing: favourite song, warm drink, or a short walk outside.'],micro:'Text someone "hey, can we talk for a bit?"'},
-  angry:{e:'😡',l:'Angry',adv:['Anger is information, so let it cool before you act. Step away for a few minutes first.','Burn off the heat: a fast walk, push-ups, or squeezing a pillow works wonders.','Write what you wish you could say, then keep it in the vent box instead of sending it.'],micro:'Breathe out slowly for longer than you breathe in, 5 times.'}
-};
-const KEYWORDS = [
-  [/exam|test|quiz|finals|midterm/i,'📚 Exams: study in 25-minute blocks with 5-minute breaks, and do practice questions instead of re-reading.'],
-  [/homework|assignment|deadline|project|due/i,'📝 Workload: list everything due, order it by deadline, and start with a 10-minute "easy win".'],
-  [/friend|left out|ignored|fight|argument|drama|group chat/i,'🤝 Friends: give things a day to cool off, then say how you felt using "I felt…" rather than blame.'],
-  [/bully|bullied|teas|mean to me|picked on|harass/i,'🛡️ Being mistreated is never your fault. Tell a trusted adult or school counselor, and keep screenshots or notes of what happened.'],
-  [/teacher|class|lesson|detention|grade|marks/i,'🏫 School stuff: a short, polite message to your teacher asking for help usually goes better than you expect.'],
-  [/mom|dad|parent|home|family|sibling|brother|sister/i,'🏠 Home: pick a calm moment to talk, and start with what you need rather than what went wrong.'],
-  [/sleep|tired|exhaust|insomnia/i,'🌙 Sleep: dim screens 30 minutes before bed and keep a regular bedtime this week.'],
-  [/crush|date|dating|like someone|love/i,'💜 Crushes: be kind, be yourself, and remember a "no" never says anything bad about your worth.'],
-  [/lonely|alone|no one|nobody/i,'🌱 Feeling alone: try joining one club or sending one friendly message today. Small steps build connection.']
-];
-const CRISIS = /kill myself|suicid|end my life|want to die|hurt myself|self.?harm|don'?t want to (live|be here)|no reason to live/i;
-
-function buildAdvice(){
-  const text = $('#vent').value.trim();
-  if (!selMood && !text){ return '<div class="advice">Pick a mood or write a few words first. 💜</div>'; }
-  if (CRISIS.test(text)){
-    return `<div class="advice care"><b>💜 That sounds really heavy, and I'm glad you wrote it down.</b><br>
-    Please talk to someone you trust right now: a parent or guardian, a teacher, a school counselor, or a local crisis helpline. You deserve real support, and you don't have to carry this alone.
-    If you might be in danger, contact your local emergency services immediately.</div>`;
-  }
-  const m = MOODS[selMood] || MOODS.calm;
-  const main = m.adv[Math.floor(Math.random() * m.adv.length)];
-  const tips = KEYWORDS.filter(k => k[0].test(text)).slice(0, 2).map(k => k[1]);
-  return `<div class="advice"><b>${m.e} Feeling ${m.l.toLowerCase()}?</b><p style="margin:6px 0 0">${esc(main)}</p>
-    ${tips.length ? '<ul>' + tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : ''}
-    <div class="micro">⚡ Try this now: ${esc(m.micro)}</div></div>`;
-}
-
-/* ============ IMAGE COMPRESSION ============ */
-function compressDrawable(src, w0, h0){
-  const w = Math.min(350, w0), h = Math.round(h0 * w / w0);
-  const c = document.createElement('canvas'); c.width = w; c.height = h;
-  c.getContext('2d').drawImage(src, 0, 0, w, h);
-  return c.toDataURL('image/jpeg', 0.6);
-}
-function compressFile(file){
-  return new Promise((res, rej) => {
-    const fr = new FileReader();
-    fr.onerror = rej;
-    fr.onload = () => {
-      const img = new Image();
-      img.onerror = rej;
-      img.onload = () => res(compressDrawable(img, img.naturalWidth || img.width, img.naturalHeight || img.height));
-      img.src = fr.result;
+    const $ = id => document.getElementById(id);
+    const state = {
+      name: "", peer: null, peerId: "", peerOpened: false,
+      connections: new Map(), pendingIncoming: new Map(),
+      pendingOutgoing: new Map(), requests: [], squad: [],
+      notifications: [], histories: {}, activeFriend: "",
+      selectedMood: "", photoData: "", cameraStream: null,
+      unread: {}, unreadTotal: 0, lastNoticeTimer: null,
+      opening: false
     };
-    fr.readAsDataURL(file);
-  });
-}
-function setSnap(ctx, data){
-  snaps[ctx] = data;
-  const bar = document.querySelector(`.snapbar[data-ctx="${ctx}"]`), th = bar.querySelector('.thumb');
-  if (data){ th.querySelector('img').src = data; th.hidden = false; } else { th.hidden = true; th.querySelector('img').removeAttribute('src'); }
-}
 
-/* camera */
-let camStream = null, camCtx = null, facing = 'user';
-async function openCam(ctx){
-  camCtx = ctx; $('#camModal').hidden = false; $('#camMsg').textContent = 'Starting camera…';
-  await startCam();
-}
-async function startCam(){
-  stopCam();
-  try {
-    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 640 } }, audio: false });
-    const v = $('#vid'); v.srcObject = camStream; v.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none';
-    $('#camMsg').textContent = 'Smile! 🙂';
-  } catch(e){
-    $('#camMsg').textContent = 'Camera unavailable (allow permission, and use HTTPS). You can upload a photo instead.';
-  }
-}
-function stopCam(){ if (camStream){ camStream.getTracks().forEach(t => t.stop()); camStream = null; } }
-function closeCam(){ stopCam(); $('#camModal').hidden = true; }
-$('#snapBtn').onclick = () => {
-  const v = $('#vid'); if (!camStream || !v.videoWidth) return;
-  setSnap(camCtx, compressDrawable(v, v.videoWidth, v.videoHeight)); closeCam();
-};
-$('#flipBtn').onclick = () => { facing = facing === 'user' ? 'environment' : 'user'; startCam(); };
-$('#camCancel').onclick = closeCam;
+    function cleanName(name) {
+      return String(name || "").trim().replace(/\s+/g, " ");
+    }
+    function validName(name) {
+      return /^[a-zA-Z0-9_]{1,24}$/.test(name);
+    }
+    function peerIdFor(name) {
+      return PREFIX + name.trim().toLowerCase();
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[ch]);
+    }
+    function loadDb() {
+      try {
+        const db = JSON.parse(localStorage.getItem(DB_KEY) || "{}");
+        return db && typeof db === "object" ? db : {};
+      } catch (_) { return {}; }
+    }
+    function saveDb() {
+      const db = loadDb();
+      db[state.name] = {
+        squad: state.squad.slice(0, 300),
+        histories: state.histories,
+        notifications: state.notifications.slice(0, MAX_NOTIFICATIONS),
+        mood: state.selectedMood,
+        updatedAt: Date.now()
+      };
+      try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+      catch (_) { showNotice("This browser could not save your local data.", "error"); }
+    }
+    function restoreDb() {
+      const saved = loadDb()[state.name] || {};
+      state.squad = Array.isArray(saved.squad) ? saved.squad.filter(n => n !== state.name) : [];
+      state.histories = saved.histories && typeof saved.histories === "object" ? saved.histories : {};
+      state.notifications = Array.isArray(saved.notifications) ? saved.notifications : [];
+      state.selectedMood = saved.mood || "";
+      for (const friend of state.squad) state.histories[friend] ||= [];
+      updateMoodUI();
+      renderAll();
+    }
+    function showNotice(message, kind = "") {
+      const el = $("globalNotice");
+      el.textContent = message;
+      el.className = "notice" + (kind ? " " + kind : "");
+      clearTimeout(state.lastNoticeTimer);
+      state.lastNoticeTimer = setTimeout(() => el.classList.add("hidden"), 6500);
+    }
+    function setStatus(text, mode = "") {
+      $("statusText").textContent = text;
+      $("statusDot").className = "dot" + (mode ? " " + mode : "");
+    }
+    function notify(message) {
+      state.notifications.unshift({ id: cryptoId(), text: message, time: Date.now(), read: false });
+      state.notifications = state.notifications.slice(0, MAX_NOTIFICATIONS);
+      saveDb();
+      renderNotifications();
+    }
+    function cryptoId() {
+      try { return crypto.randomUUID(); }
+      catch (_) { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+    }
+    function setPeerStatus() {
+      if (state.peerOpened && state.peer && !state.peer.destroyed) {
+        setStatus("Online & Ready", "online");
+      } else if (state.peer && state.peer.disconnected) {
+        setStatus("Reconnecting…");
+      } else {
+        setStatus("Connecting to PeerJS…");
+      }
+      $("peerIdLabel").textContent = state.peerId || "Not initialized";
+    }
+    function addSquad(name) {
+      if (!name || name === state.name) return;
+      if (!state.squad.includes(name)) state.squad.push(name);
+      state.histories[name] ||= [];
+      saveDb();
+      renderAll();
+    }
+    function removeSquad(name) {
+      state.squad = state.squad.filter(n => n !== name);
+      delete state.histories[name];
+      state.connections.get(name)?.close();
+      state.connections.delete(name);
+      if (state.activeFriend === name) state.activeFriend = "";
+      saveDb();
+      renderAll();
+    }
+    function addHistory(name, msg) {
+      if (!name) return;
+      state.histories[name] ||= [];
+      state.histories[name].push(msg);
+      if (state.histories[name].length > MAX_HISTORY) {
+        state.histories[name] = state.histories[name].slice(-MAX_HISTORY);
+      }
+      if (state.activeFriend !== name || !$("chatTab").classList.contains("hidden") === false) {
+        if (msg.from !== state.name) {
+          state.unread[name] = (state.unread[name] || 0) + 1;
+        }
+      }
+      saveDb();
+      renderChat();
+      renderBadges();
+    }
+    function renderAll() {
+      renderRequests();
+      renderSquad();
+      renderNotifications();
+      renderChat();
+      renderBadges();
+    }
+    function renderBadges() {
+      const count = state.requests.length;
+      $("requestBadge").textContent = count;
+      $("requestBadge").classList.toggle("hidden", count === 0);
+      $("requestCount").textContent = count ? "(" + count + ")" : "";
+      $("chatBadge").textContent = state.unreadTotal || "";
+      $("chatBadge").classList.toggle("hidden", !state.unreadTotal);
+    }
+    function renderRequests() {
+      const list = $("requestList");
+      if (!state.requests.length) {
+        list.innerHTML = '<div class="empty">No friend requests yet.</div>';
+        renderBadges();
+        return;
+      }
+      list.innerHTML = state.requests.map(req => `
+        <div class="list-item">
+          <div><strong>${escapeHtml(req.from)}</strong><div class="small muted">Wants to join your squad</div></div>
+          <div class="actions">
+            <button class="btn green" data-accept="${escapeHtml(req.from)}" type="button">Accept</button>
+            <button class="btn red" data-decline="${escapeHtml(req.from)}" type="button">Decline</button>
+          </div>
+        </div>`).join("");
+      renderBadges();
+    }
+    function renderSquad() {
+      const list = $("squadList");
+      if (!state.squad.length) list.innerHTML = '<div class="empty">Your squad is waiting for friends.</div>';
+      else list.innerHTML = state.squad.map(name => {
+        const online = isConnected(name);
+        return `<div class="list-item">
+          <div class="row"><span class="dot ${online ? "online" : ""}"></span><div><strong>${escapeHtml(name)}</strong><div class="small muted">${online ? "Connected" : "Not connected"}</div></div></div>
+          <div class="actions"><button class="btn" data-chat="${escapeHtml(name)}" type="button">Chat</button><button class="btn red" data-remove="${escapeHtml(name)}" type="button">Remove</button></div>
+        </div>`;
+      }).join("");
+    }
+    function renderNotifications() {
+      const list = $("notificationList");
+      if (!state.notifications.length) {
+        list.innerHTML = '<div class="empty">You’re all caught up.</div>';
+        return;
+      }
+      list.innerHTML = state.notifications.slice(0, 12).map(n =>
+        `<div class="list-item"><div><div>${escapeHtml(n.text)}</div><div class="small muted">${new Date(n.time).toLocaleString()}</div></div></div>`
+      ).join("");
+    }
+    function isConnected(name) {
+      const conn = state.connections.get(name);
+      return !!conn && conn.open === true;
+    }
+    function renderChat() {
+      const friends = $("chatFriendList");
+      if (!state.squad.length) {
+        friends.innerHTML = '<div class="empty">Accept a friend request to start chatting.</div>';
+      } else {
+        friends.innerHTML = state.squad.map(name => `
+          <button class="btn friend-choice ${state.activeFriend === name ? "active" : ""}" data-select-chat="${escapeHtml(name)}" type="button">
+            ${escapeHtml(name)} ${isConnected(name) ? "🟢" : "⚪"}
+            ${(state.unread[name] || 0) ? " · " + state.unread[name] + " new" : ""}
+          </button>`).join("");
+      }
+      const friend = state.activeFriend;
+      const usable = !!friend && state.squad.includes(friend);
+      $("chatHeader").textContent = usable ? friend : "Choose a squad member";
+      $("messageInput").disabled = !usable;
+      $("sendMessageBtn").disabled = !usable;
+      $("chatPhotoInput").disabled = !usable;
+      const msgs = usable ? (state.histories[friend] || []) : [];
+      const list = $("messageList");
+      if (!usable || !msgs.length) {
+        list.innerHTML = '<div class="empty">No messages yet. Say hello when you connect.</div>';
+      } else {
+        list.innerHTML = msgs.map(m => {
+          const mine = m.from === state.name;
+          let body = escapeHtml(m.text || "");
+          if (m.photo) body += `<img src="${m.photo}" alt="Shared photo" loading="lazy">`;
+          return `<div class="bubble ${mine ? "mine" : ""}">${body}<div class="small" style="opacity:.7;margin-top:5px">${mine ? "You" : escapeHtml(m.from)} · ${new Date(m.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</div></div>`;
+        }).join("");
+        list.scrollTop = list.scrollHeight;
+      }
+      const connected = usable && isConnected(friend);
+      $("chatStatus").textContent = !usable ? "Choose a friend to begin." : connected
+        ? "Direct connection ready." : "Not connected. Try reconnecting from Squad.";
+    }
+    function updateMoodUI() {
+      document.querySelectorAll("[data-mood]").forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.mood === state.selectedMood);
+        btn.setAttribute("aria-pressed", String(btn.dataset.mood === state.selectedMood));
+      });
+    }
+    function addVibe(mood, note) {
+      const feed = $("vibeFeed");
+      if (feed.querySelector(".empty")) feed.innerHTML = "";
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      const title = document.createElement("strong");
+      title.textContent = (mood || "Check-in") + " · " + new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+      const content = document.createElement("div");
+      content.className = "muted";
+      content.textContent = note || "Checked in with myself today.";
+      item.append(title, content);
+      feed.prepend(item);
+      while (feed.children.length > 8) feed.lastElementChild.remove();
+    }
 
-let uploadCtx = null;
-$('#fileIn').addEventListener('change', async e => {
-  const f = e.target.files[0]; e.target.value = '';
-  if (!f || !uploadCtx) return;
-  try { setSnap(uploadCtx, await compressFile(f)); } catch(err){ toast('Could not read that image 😕'); }
-});
-document.addEventListener('click', e => {
-  const b = e.target.closest('.snapbar [data-act]');
-  if (b){
-    const ctx = b.closest('.snapbar').dataset.ctx, a = b.dataset.act;
-    if (a === 'cam') openCam(ctx);
-    if (a === 'upload'){ uploadCtx = ctx; $('#fileIn').click(); }
-    if (a === 'rm') setSnap(ctx, null);
-    return;
-  }
-  const img = e.target.closest('img.pic, .bubble img');
-  if (img){ $('#lightbox img').src = img.src; $('#lightbox').hidden = false; }
-});
-$('#lightbox').onclick = () => { $('#lightbox').hidden = true; };
+    function setupPeer(name) {
+      if (typeof Peer !== "function") {
+        setStatus("PeerJS failed to load", "error");
+        showNotice("PeerJS could not load. Check your internet connection and reload this page.", "error");
+        return;
+      }
+      if (state.peer) {
+        try { state.peer.destroy(); } catch (_) {}
+      }
+      state.peerOpened = false;
+      state.opening = true;
+      state.peerId = peerIdFor(name);
+      state.connections.clear();
+      state.pendingIncoming.clear();
+      state.pendingOutgoing.clear();
+      setPeerStatus();
 
-/* ============ LOGIN ============ */
-$('#joinBtn').onclick = join;
-$('#nameIn').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
-$('#pinIn').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
-async function join(){
-  const err = $('#welcomeErr'); err.textContent = '';
-  const raw = $('#nameIn').value.trim().replace(/\s+/g, ' ');
-  if (!/^[A-Za-z0-9_ ]{2,20}$/.test(raw)){ err.textContent = 'Use 2–20 letters, numbers, spaces or underscores.'; return; }
-  const key = raw.toLowerCase(), pin = $('#pinIn').value.trim(), pinHash = await hashPin(pin);
-  $('#joinBtn').disabled = true; $('#joinBtn').textContent = 'Connecting…';
-  const existing = await new Promise(res => {
-    let done = false; const t = setTimeout(() => { if (!done){ done = true; res(null); } }, 2200);
-    gUsers.get(key).once(d => { if (!done){ done = true; clearTimeout(t); res(d); } });
-  });
-  $('#joinBtn').disabled = false; $('#joinBtn').textContent = 'Join AfterBell →';
-  if (existing && existing.pin && existing.pin !== pinHash){ err.textContent = 'That name is protected by a PIN. Enter the right PIN or choose another name.'; return; }
-  const display = (existing && existing.name) || raw;
-  gUsers.get(key).put({ name: display, pin: (existing && existing.pin) || pinHash, seen: Date.now(), joined: (existing && existing.joined) || Date.now() });
-  store.set('afterbell_user', { key, name: display, pin: (existing && existing.pin) || pinHash });
-  startApp({ key, name: display });
-}
-$('#logoutBtn').onclick = () => { store.del('afterbell_user'); location.reload(); };
+      let peer;
+      try {
+        peer = new Peer(state.peerId, {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: "stun:stun.l.google.com:19302" },
+              { urls: "stun:stun1.l.google.com:19302" }
+            ]
+          }
+        });
+      } catch (err) {
+        state.opening = false;
+        setStatus("Could not initialize PeerJS", "error");
+        showNotice("Could not initialize PeerJS: " + err.message, "error");
+        return;
+      }
+      state.peer = peer;
 
-/* ============ START ============ */
-function startApp(user){
-  me = user; ready = false;
-  $('#welcome').hidden = true; $('#app').hidden = false;
-  $('#meName').textContent = me.name; $('#meAv').textContent = ini(me.name);
-  gUsers.get(me.key).put({ name: me.name, seen: Date.now() });
-  setInterval(() => gUsers.get(me.key).put({ seen: Date.now() }), 30000);
-  setTimeout(() => { ready = true; }, 4000);
+      peer.on("open", id => {
+        if (state.peer !== peer) return;
+        state.peerOpened = true;
+        state.opening = false;
+        state.peerId = id;
+        setPeerStatus();
+        $("peerIdLabel").textContent = id;
+        showNotice("You're online and ready for friend requests.", "success");
+        // Retry requests that were accepted or queued before opening.
+        for (const friend of state.squad) {
+          if (state.pendingOutgoing.has(friend) || !isConnected(friend)) {
+            // Connections are only retried on user action to avoid loops.
+          }
+        }
+      });
 
-  gUsers.map().on((d, k) => {
-    if (!d || !d.name) delete users[k]; else users[k] = { key: k, name: d.name, seen: d.seen || 0 };
-    sched();
-  });
-  gReqs.map().on((d, k) => {
-    const prev = reqs[k];
-    if (!d || !d.from || !d.to){ delete reqs[k]; sched(); return; }
-    reqs[k] = { id: k, from: d.from, to: d.to, fromName: d.fromName, toName: d.toName, status: d.status, ts: d.ts || 0 };
-    if (ready && d.to === me.key && d.status === 'pending' && !(prev && prev.status === 'pending'))
-      toast(`🔔 <b>${esc(d.fromName)}</b> sent you a friend request!`);
-    if (prev && prev.status === 'pending' && d.status === 'accepted' && d.from === me.key)
-      toast(`🎉 <b>${esc(d.toName)}</b> accepted your friend request!`);
-    sched();
-  });
-  gFeed.map().on((p, id) => {
-    if (!p || !p.ts){ delete feed[id]; } else feed[id] = { id, uk: p.uk, name: p.name, mood: p.mood, caption: p.caption, img: p.img, ts: p.ts };
-    sched();
-  });
-  sched();
-}
+      peer.on("connection", conn => {
+        if (state.peer !== peer) { conn.close(); return; }
+        registerConnection(conn, "incoming");
+      });
 
-/* ============ FRIEND LOGIC ============ */
-const friendsKeys = () => Object.values(reqs).filter(r => r.status === 'accepted' && (r.from === me.key || r.to === me.key)).map(r => r.from === me.key ? r.to : r.from);
-const nameOf = k => (users[k] && users[k].name) || k;
-function relation(k){
-  if (friendsKeys().includes(k)) return 'friend';
-  if (reqs[me.key + '>' + k] && reqs[me.key + '>' + k].status === 'pending') return 'sent';
-  if (reqs[k + '>' + me.key] && reqs[k + '>' + me.key].status === 'pending') return 'incoming';
-  return 'none';
-}
-function sendRequest(toKey){
-  const r = relation(toKey);
-  if (toKey === me.key) return 'That\'s you! 😄';
-  if (r === 'friend') return 'You\'re already friends.';
-  if (r === 'sent') return 'Request already sent. Waiting for them.';
-  if (r === 'incoming'){ respond(reqs[toKey + '>' + me.key].id, 'accepted'); return 'They had already asked you, so you\'re now friends! 🎉'; }
-  const u = users[toKey]; if (!u) return 'No one with that name yet. Ask them to join AfterBell first (if they just joined, wait a few seconds).';
-  gReqs.get(me.key + '>' + toKey).put({ from: me.key, to: toKey, fromName: me.name, toName: u.name, status: 'pending', ts: Date.now() });
-  toast(`📨 Request sent to <b>${esc(u.name)}</b>`); return '';
-}
-function respond(id, status){ gReqs.get(id).put({ status, ts: Date.now() }); }
-$('#sendReqBtn').onclick = () => {
-  const n = $('#friendIn').value.trim().toLowerCase().replace(/\s+/g, ' ');
-  const msg = n ? sendRequest(n) : 'Enter a name first.'; $('#friendErr').textContent = msg; if (!msg) $('#friendIn').value = '';
-};
-$('#friendIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('#sendReqBtn').click(); });
+      peer.on("disconnected", () => {
+        if (state.peer !== peer) return;
+        state.peerOpened = false;
+        setPeerStatus();
+        // Reconnect signaling; this does not promise that every peer is reachable.
+        if (!peer.destroyed) {
+          try { peer.reconnect(); } catch (_) {}
+        }
+      });
 
-/* ============ MOOD UI ============ */
-$('#moodPills').innerHTML = Object.entries(MOODS).map(([k, m]) => `<button class="pill" data-mood="${k}">${m.e} ${m.l}</button>`).join('');
-$('#moodPills').onclick = e => {
-  const b = e.target.closest('[data-mood]'); if (!b) return;
-  selMood = b.dataset.mood; $$('#moodPills .pill').forEach(p => p.classList.toggle('sel', p === b));
-};
-$('#adviceBtn').onclick = () => { $('#adviceOut').innerHTML = buildAdvice(); };
-$('#postBtn').onclick = () => {
-  const err = $('#postErr'); err.textContent = '';
-  const cap = $('#caption').value.trim();
-  if (!selMood){ err.textContent = 'Pick a mood first.'; return; }
-  if (CRISIS.test(cap)){ err.textContent = 'This sounds serious. Please talk to a trusted adult. 💜'; return; }
-  gFeed.set({ uk: me.key, name: me.name, mood: selMood, caption: cap, img: snaps.feed || '', ts: Date.now() });
-  $('#caption').value = ''; setSnap('feed', null); toast('🌈 Vibe posted to the feed!'); showTab('feed');
-};
+      peer.on("close", () => {
+        if (state.peer !== peer) return;
+        state.peerOpened = false;
+        setStatus("Offline", "");
+      });
 
-/* ============ TABS ============ */
-function showTab(t){
-  activeTab = t;
-  $$('.tab').forEach(s => s.hidden = s.id !== 'tab-' + t);
-  $$('.tabbtn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
-  if (t === 'chat') markRead(); sched();
-}
-$$('.tabbtn').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+      peer.on("error", err => {
+        if (state.peer !== peer) return;
+        const messages = {
+          "unavailable-id": "That username is already online in another session. Choose a different username or close the other session.",
+          "peer-unavailable": "That friend is not reachable right now. Ask them to open AfterBell and check their connection.",
+          "network": "The signaling connection failed. Check your internet and try again.",
+          "server-error": "The PeerJS signaling server returned an error. Try again later.",
+          "socket-error": "The signaling socket failed. Check your internet connection.",
+          "socket-closed": "The signaling socket closed. Reconnecting may help."
+        };
+        setStatus("Connection issue", "error");
+        showNotice(messages[err.type] || ("PeerJS: " + (err.message || err.type || "connection error")), "error");
+        if (err.type === "peer-unavailable") {
+          for (const [friend, conn] of state.connections) {
+            if (conn.peer === err.peer && !conn.open) state.connections.delete(friend);
+          }
+          renderAll();
+        }
+      });
+    }
 
-/* ============ CHAT ============ */
-function subscribeChats(){
-  friendsKeys().forEach(fk => {
-    const pk = pairKey(me.key, fk); if (subscribed[pk]) return; subscribed[pk] = true;
-    gChats.get(pk).map().on((m, id) => {
-      if (!m || !m.ts || !m.from) return;
-      chats[pk] = chats[pk] || {};
-      const isNew = !chats[pk][id];
-      chats[pk][id] = { id, from: m.from, name: m.name, text: m.text, img: m.img, ts: m.ts };
-      if (isNew && ready && m.from !== me.key && !(activeTab === 'chat' && activeChat === fk))
-        toast(`💬 <b>${esc(m.name)}</b>: ${esc((m.text || '📷 Snap').slice(0, 60))}`);
-      if (activeTab === 'chat' && activeChat && pairKey(me.key, activeChat) === pk) markRead();
-      sched();
+    function registerConnection(conn, direction) {
+      if (!conn || conn.__afterbellRegistered) return;
+      conn.__afterbellRegistered = true;
+      conn.__direction = direction;
+      conn.__authorized = false;
+      conn.__remoteName = "";
+      conn.__seenMessageIds = new Set();
+      conn.on("open", () => {
+        if (state.peer && conn.peer === state.peer.id) { conn.close(); return; }
+        renderAll();
+        // Exchange identity after the data channel is ready.
+        try { conn.send({ type: "hello", from: state.name, version: 1 }); } catch (_) {}
+      });
+      conn.on("data", packet => {
+        if (!packet || typeof packet !== "object" || typeof packet.type !== "string") return;
+        handlePacket(conn, packet);
+      });
+      conn.on("close", () => {
+        const name = conn.__remoteName;
+        if (name && state.connections.get(name) === conn) state.connections.delete(name);
+        renderAll();
+      });
+      conn.on("error", err => {
+        showNotice("Connection problem: " + (err.message || "data channel error"), "error");
+        renderAll();
+      });
+    }
+
+    function connectTo(name, purpose = "manual") {
+      name = cleanName(name);
+      if (!validName(name)) {
+        showNotice("Use a username containing only letters, numbers, or underscores (1–24 characters).", "error");
+        return null;
+      }
+      if (name.toLowerCase() === state.name.toLowerCase()) {
+        showNotice("You can't connect to your own username.", "error");
+        return null;
+      }
+      if (!state.peer || !state.peerOpened || state.peer.destroyed) {
+        showNotice("Your PeerJS connection isn't ready yet. Wait for Online & Ready.", "error");
+        return null;
+      }
+      const existing = state.connections.get(name);
+      if (existing && (existing.open || existing.__connecting)) return existing;
+
+      const remoteId = peerIdFor(name);
+      let conn;
+      try {
+        conn = state.peer.connect(remoteId, {
+          reliable: true,
+          serialization: "binary",
+          metadata: { app: "AfterBell", version: 1 }
+        });
+      } catch (err) {
+        showNotice("Couldn't start the connection: " + err.message, "error");
+        return null;
+      }
+      conn.__connecting = true;
+      conn.__remoteName = name;
+      state.connections.set(name, conn);
+      registerConnection(conn, "outgoing");
+      conn.on("open", () => {
+        conn.__connecting = false;
+        if (purpose === "friend_request") {
+          sendPacket(conn, { type: "friend_request", from: state.name });
+          state.pendingOutgoing.set(name, Date.now());
+          notify("Friend request sent to " + name + ".");
+          showNotice("Friend request sent to " + name + ".", "success");
+        }
+        renderAll();
+      });
+      conn.on("error", () => {
+        conn.__connecting = false;
+        if (state.connections.get(name) === conn) state.connections.delete(name);
+        renderAll();
+      });
+      return conn;
+    }
+
+    function sendPacket(conn, packet) {
+      if (!conn || !conn.open) return false;
+      try { conn.send(packet); return true; }
+      catch (_) { return false; }
+    }
+
+    function handlePacket(conn, packet) {
+      const from = cleanName(packet.from || "");
+      if (packet.type === "hello") {
+        if (!validName(from) || peerIdFor(from) !== conn.peer) {
+          conn.close();
+          return;
+        }
+        conn.__remoteName = from;
+        const current = state.connections.get(from);
+        if (current && current !== conn && current.open) {
+          // Keep the existing connection to avoid duplicate chat channels.
+          conn.close();
+          return;
+        }
+        state.connections.set(from, conn);
+        conn.__authorized = state.squad.includes(from);
+        renderAll();
+        return;
+      }
+
+      if (!validName(from) || peerIdFor(from) !== conn.peer) {
+        conn.close();
+        return;
+      }
+      if (!conn.__remoteName) {
+        conn.__remoteName = from;
+        state.connections.set(from, conn);
+      }
+      if (conn.__remoteName !== from) {
+        conn.close();
+        return;
+      }
+
+      switch (packet.type) {
+        case "friend_request": {
+          if (from.toLowerCase() === state.name.toLowerCase()) return;
+          if (state.squad.includes(from)) {
+            sendPacket(conn, { type: "friend_accepted", from: state.name });
+            conn.__authorized = true;
+            return;
+          }
+          if (!state.requests.some(r => r.from === from)) {
+            state.requests.unshift({ from, receivedAt: Date.now() });
+            state.requests = state.requests.slice(0, 100);
+            notify("New friend request from " + from + ".");
+            showNotice("Friend request received from " + from + ".", "success");
+            renderRequests();
+          }
+          return;
+        }
+        case "friend_accepted": {
+          if (!state.pendingOutgoing.has(from) && !state.squad.includes(from)) return;
+          state.pendingOutgoing.delete(from);
+          addSquad(from);
+          conn.__authorized = true;
+          notify(from + " accepted your friend request.");
+          showNotice(from + " is now in your squad.", "success");
+          // Send reciprocal acknowledgement so both clients converge on squad membership.
+          sendPacket(conn, { type: "friend_confirmed", from: state.name });
+          renderAll();
+          return;
+        }
+        case "friend_confirmed": {
+          if (state.squad.includes(from)) {
+            conn.__authorized = true;
+            addSquad(from);
+          }
+          return;
+        }
+        case "friend_declined": {
+          state.pendingOutgoing.delete(from);
+          notify(from + " declined your friend request.");
+          renderAll();
+          return;
+        }
+        case "chat_message": {
+          if (!state.squad.includes(from) || !conn.__authorized) return;
+          const id = String(packet.id || "");
+          if (!id || conn.__seenMessageIds.has(id)) return;
+          conn.__seenMessageIds.add(id);
+          const text = typeof packet.text === "string" ? packet.text.slice(0, 3000) : "";
+          if (!text) return;
+          addHistory(from, { id, from, text, time: Number(packet.time) || Date.now() });
+          return;
+        }
+        case "chat_photo": {
+          if (!state.squad.includes(from) || !conn.__authorized) return;
+          const id = String(packet.id || "");
+          if (!id || conn.__seenMessageIds.has(id)) return;
+          conn.__seenMessageIds.add(id);
+          if (typeof packet.photo !== "string" || !packet.photo.startsWith("data:image/jpeg;base64,")) return;
+          if (packet.photo.length > 280000) return;
+          addHistory(from, {
+            id, from, text: "", photo: packet.photo,
+            time: Number(packet.time) || Date.now()
+          });
+          return;
+        }
+      }
+    }
+
+    function acceptRequest(name) {
+      const req = state.requests.find(r => r.from === name);
+      if (!req) return;
+      let conn = state.connections.get(name);
+      if (!conn || !conn.open) {
+        // The incoming request channel may still be available in pendingIncoming.
+        conn = state.pendingIncoming.get(name);
+      }
+      if (!conn || !conn.open) {
+        conn = connectTo(name, "accept");
+      }
+      if (!conn) {
+        showNotice("Could not reach " + name + ". Ask them to send a new request while both devices are online.", "error");
+        return;
+      }
+      addSquad(name);
+      conn.__authorized = true;
+      sendPacket(conn, { type: "friend_accepted", from: state.name });
+      state.requests = state.requests.filter(r => r.from !== name);
+      notify("You accepted " + name + "'s friend request.");
+      showNotice(name + " was added to your squad.", "success");
+      renderAll();
+    }
+
+    function declineRequest(name) {
+      const conn = state.connections.get(name) || state.pendingIncoming.get(name);
+      if (conn && conn.open) sendPacket(conn, { type: "friend_declined", from: state.name });
+      state.requests = state.requests.filter(r => r.from !== name);
+      state.pendingIncoming.delete(name);
+      notify("Friend request from " + name + " declined.");
+      renderAll();
+    }
+
+    function sendChatMessage() {
+      const name = state.activeFriend;
+      const text = $("messageInput").value.trim();
+      if (!name || !text) return;
+      const conn = state.connections.get(name);
+      if (!conn || !conn.open || !conn.__authorized) {
+        showNotice("You're not connected to " + name + ". Open AfterBell on both devices and reconnect.", "error");
+        return;
+      }
+      const packet = { type: "chat_message", id: cryptoId(), from: state.name, text: text.slice(0, 3000), time: Date.now() };
+      if (!sendPacket(conn, packet)) {
+        showNotice("Message could not be sent. Check the connection.", "error");
+        return;
+      }
+      addHistory(name, { id: packet.id, from: state.name, text: packet.text, time: packet.time });
+      $("messageInput").value = "";
+    }
+
+    async function compressImage(file) {
+      if (!file || !file.type.startsWith("image/")) throw new Error("Choose a valid image file.");
+      if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
+      const url = URL.createObjectURL(file);
+      try {
+        const img = new Image();
+        img.src = url;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error("Couldn't read that image."));
+        });
+        const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+        const width = Math.max(1, Math.round(img.naturalWidth * scale));
+        const height = Math.max(1, Math.round(img.naturalHeight * scale));
+        const canvas = $("photoCanvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d", { alpha: false });
+        ctx.drawImage(img, 0, 0, width, height);
+        let quality = 0.78;
+        let data = canvas.toDataURL("image/jpeg", quality);
+        while (data.length > MAX_IMAGE_BYTES * 1.4 && quality > 0.3) {
+          quality -= 0.1;
+          data = canvas.toDataURL("image/jpeg", quality);
+        }
+        return { data, width, height, bytes: Math.round(data.length * 0.75), quality };
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function stopCamera() {
+      if (state.cameraStream) {
+        state.cameraStream.getTracks().forEach(track => track.stop());
+        state.cameraStream = null;
+      }
+      $("cameraVideo").srcObject = null;
+      $("cameraVideo").classList.add("hidden");
+      $("captureBtn").classList.add("hidden");
+      $("stopCameraBtn").classList.add("hidden");
+      $("cameraBtn").classList.remove("hidden");
+    }
+
+    async function usePhotoFile(file) {
+      try {
+        const result = await compressImage(file);
+        state.photoData = result.data;
+        $("photoPreview").src = result.data;
+        $("photoPreview").classList.remove("hidden");
+        $("photoInfo").textContent = `${result.width} × ${result.height}px · compressed JPEG · approximately ${Math.max(1, Math.round(result.bytes / 1024))} KB`;
+        $("clearPhotoBtn").classList.remove("hidden");
+      } catch (err) {
+        showNotice(err.message || "Could not process that image.", "error");
+      }
+    }
+
+    $("welcomeForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const name = cleanName($("nameInput").value);
+      if (!validName(name)) {
+        showNotice("Choose 1–24 letters, numbers, or underscores only.", "error");
+        return;
+      }
+      state.name = name;
+      $("welcomeScreen").classList.add("hidden");
+      $("appScreen").classList.remove("hidden");
+      $("displayName").textContent = name;
+      restoreDb();
+      setupPeer(name);
     });
-  });
-}
-function msgsFor(fk){ return Object.values(chats[pairKey(me.key, fk)] || {}).sort((a, b) => a.ts - b.ts); }
-function unreadFor(fk){ const pk = pairKey(me.key, fk), lr = lastRead[pk] || 0; return msgsFor(fk).filter(m => m.from !== me.key && m.ts > lr).length; }
-function markRead(){
-  if (!activeChat) return;
-  const pk = pairKey(me.key, activeChat), last = msgsFor(activeChat).slice(-1)[0];
-  const t = Math.max(Date.now(), last ? last.ts : 0);
-  if ((lastRead[pk] || 0) < t){ lastRead[pk] = t; store.set('afterbell_read', lastRead); }
-}
-function openChat(fk){ activeChat = fk; markRead(); sched(); $('#chatGrid').classList.add('inconv'); setTimeout(() => { const m = $('#msgs'); m.scrollTop = m.scrollHeight; }, 30); }
-$('#backBtn').onclick = () => { activeChat = null; $('#chatGrid').classList.remove('inconv'); sched(); };
-function sendMsg(){
-  if (!activeChat) return;
-  const text = $('#msgIn').value.trim(); if (!text && !snaps.chat) return;
-  gChats.get(pairKey(me.key, activeChat)).set({ from: me.key, name: me.name, text, img: snaps.chat || '', ts: Date.now() });
-  $('#msgIn').value = ''; setSnap('chat', null);
-}
-$('#sendMsgBtn').onclick = sendMsg;
-$('#msgIn').addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
 
-/* ============ RENDER ============ */
-let timer = null; function sched(){ if (!me) return; clearTimeout(timer); timer = setTimeout(render, 90); }
-function render(){
-  if (!me) return;
-  subscribeChats();
-  const fr = friendsKeys();
+    $("changeNameBtn").addEventListener("click", () => {
+      if (!confirm("Change username? Your saved squad and messages stay in this browser under the current username.")) return;
+      stopCamera();
+      if (state.peer) {
+        try { state.peer.destroy(); } catch (_) {}
+      }
+      state.peer = null;
+      state.peerOpened = false;
+      state.name = "";
+      $("appScreen").classList.add("hidden");
+      $("welcomeScreen").classList.remove("hidden");
+      $("nameInput").value = "";
+      setStatus("Offline · Enter your name");
+    });
 
-  // Badges
-  const inc = Object.values(reqs).filter(r => r.to === me.key && r.status === 'pending');
-  const unreadTotal = fr.reduce((n, k) => n + unreadFor(k), 0);
-  const bs = $('#bSquad'), bc = $('#bChat');
-  bs.hidden = !inc.length; bs.textContent = inc.length;
-  bc.hidden = !unreadTotal; bc.textContent = unreadTotal;
-  document.title = (inc.length + unreadTotal ? `(${inc.length + unreadTotal}) ` : '') + 'AfterBell: Student Mood & Squad Hub';
+    $("copyIdBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(state.peerId);
+        showNotice("Peer ID copied.", "success");
+      } catch (_) {
+        showNotice("Clipboard access is unavailable. Copy the Peer ID shown on screen.", "error");
+      }
+    });
 
-  // Feed
-  const posts = Object.values(feed).sort((a, b) => b.ts - a.ts).slice(0, 40);
-  $('#feedList').innerHTML = posts.length ? posts.map(p => {
-    const m = MOODS[p.mood] || MOODS.calm, img = safeImg(p.img), mine = p.uk === me.key;
-    const add = !mine && relation(p.uk) === 'none' && users[p.uk] ? `<button class="btn ghost sm" data-add="${esc(p.uk)}">+ Add</button>` : '';
-    return `<div class="post"><span class="avatar lg">${esc(ini(p.name))}</span><div class="body">
-      <div class="meta"><b>${esc(p.name)}</b><span class="chip">${m.e} ${m.l}</span><span class="time">${ago(p.ts)}</span>${add}
-      ${mine ? `<button class="linkbtn" data-delpost="${esc(p.id)}">Delete</button>` : ''}</div>
-      ${p.caption ? `<p>${esc(p.caption)}</p>` : ''}${img ? `<img class="pic" src="${img}" alt="Classroom snap">` : ''}</div></div>`;
-  }).join('') : '<div class="empty">No vibes yet. Be the first to post! 🌈</div>';
+    $("addFriendForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const name = cleanName($("friendNameInput").value);
+      if (!validName(name)) {
+        showNotice("Use letters, numbers, or underscores only (1–24 characters).", "error");
+        return;
+      }
+      if (name.toLowerCase() === state.name.toLowerCase()) {
+        showNotice("That's your own username.", "error");
+        return;
+      }
+      if (state.squad.includes(name)) {
+        showNotice(name + " is already in your squad.", "error");
+        return;
+      }
+      if (state.pendingOutgoing.has(name)) {
+        showNotice("You already have a pending request to " + name + ".", "error");
+        return;
+      }
+      const conn = connectTo(name, "friend_request");
+      if (!conn) return;
+      $("friendNameInput").value = "";
+    });
 
-  // Recently active
-  const now = Date.now();
-  const recent = Object.values(users).filter(u => u.key !== me.key && now - u.seen < 3 * 86400000).sort((a, b) => b.seen - a.seen).slice(0, 24);
-  $('#recentPills').innerHTML = recent.length ? recent.map(u => {
-    const r = relation(u.key), on = now - u.seen < 120000;
-    const tag = r === 'friend' ? '✓' : r === 'sent' ? '⏳' : r === 'incoming' ? '↩' : '+';
-    return `<button class="pill" data-pill="${esc(u.key)}"><span class="mini ${on ? 'on' : ''}"></span>${esc(u.name)} <span style="opacity:.7">${tag}</span></button>`;
-  }).join('') : '<div class="empty" style="padding:6px 0">No one else has joined yet. Share this page with your friends! 🔗</div>';
+    $("requestList").addEventListener("click", e => {
+      const accept = e.target.closest("[data-accept]");
+      const decline = e.target.closest("[data-decline]");
+      if (accept) acceptRequest(accept.dataset.accept);
+      if (decline) declineRequest(decline.dataset.decline);
+    });
 
-  // Requests
-  $('#incoming').innerHTML = inc.length ? inc.map(r => `<div class="list-item"><span class="avatar lg">${esc(ini(r.fromName))}</span><div class="grow"><b>${esc(r.fromName)}</b><div class="prev">wants to be friends · ${ago(r.ts)}</div></div>
-    <button class="btn green sm" data-acc="${esc(r.id)}">Accept</button><button class="btn red sm" data-dec="${esc(r.id)}">Decline</button></div>`).join('') : '<div class="empty">No pending requests.</div>';
-  const out = Object.values(reqs).filter(r => r.from === me.key && r.status === 'pending');
-  $('#outgoing').innerHTML = out.length ? out.map(r => `<div class="list-item"><span class="avatar">${esc(ini(r.toName))}</span><div class="grow"><b>${esc(r.toName)}</b><div class="prev">waiting · ${ago(r.ts)}</div></div><button class="btn ghost sm" data-cancel="${esc(r.id)}">Cancel</button></div>`).join('') : '<div class="empty">Nothing waiting.</div>';
+    $("squadList").addEventListener("click", e => {
+      const chat = e.target.closest("[data-chat]");
+      const remove = e.target.closest("[data-remove]");
+      if (chat) {
+        state.activeFriend = chat.dataset.chat;
+        $("squadTab").classList.add("hidden");
+        $("chatTab").classList.remove("hidden");
+        document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === "chat"));
+        state.unread[state.activeFriend] = 0;
+        renderAll();
+      }
+      if (remove && confirm("Remove " + remove.dataset.remove + " from your squad on this device?")) {
+        removeSquad(remove.dataset.remove);
+      }
+    });
 
-  // Friends
-  $('#friendsList').innerHTML = fr.length ? fr.map(k => `<div class="list-item"><span class="avatar lg">${esc(ini(nameOf(k)))}</span><div class="grow"><b>${esc(nameOf(k))}</b></div>
-    <button class="btn sm" data-chat="${esc(k)}">Chat 💬</button><button class="linkbtn" data-unf="${esc(k)}">Remove</button></div>`).join('') : '<div class="empty">No friends yet. Send a request above! 👋</div>';
+    $("chatFriendList").addEventListener("click", e => {
+      const btn = e.target.closest("[data-select-chat]");
+      if (!btn) return;
+      state.activeFriend = btn.dataset.selectChat;
+      state.unread[state.activeFriend] = 0;
+      state.unreadTotal = Object.values(state.unread).reduce((sum, n) => sum + n, 0);
+      renderAll();
+    });
 
-  // Chat list
-  $('#chatList').innerHTML = fr.length ? fr.map(k => {
-    const ms = msgsFor(k), last = ms[ms.length - 1], u = unreadFor(k);
-    return `<div class="list-item" style="cursor:pointer" data-chat="${esc(k)}"><span class="avatar lg">${esc(ini(nameOf(k)))}</span><div class="grow"><b>${esc(nameOf(k))}</b>
-      <div class="prev">${last ? esc((last.from === me.key ? 'You: ' : '') + (last.text || '📷 Snap')) : 'Say hi!'}</div></div>${u ? `<span class="chip" style="background:var(--red);color:#fff">${u}</span>` : ''}</div>`;
-  }).join('') : '<div class="empty">Add friends in the Squad tab to start chatting.</div>';
+    document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      $("squadTab").classList.toggle("hidden", tab !== "squad");
+      $("chatTab").classList.toggle("hidden", tab !== "chat");
+      document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b === btn));
+      if (tab === "chat" && state.activeFriend) state.unread[state.activeFriend] = 0;
+      state.unreadTotal = Object.values(state.unread).reduce((sum, n) => sum + n, 0);
+      renderAll();
+    }));
 
-  // Conversation
-  if (activeChat && !fr.includes(activeChat)) activeChat = null;
-  $('#composer').hidden = !activeChat;
-  if (activeChat){
-    $('#cName').textContent = nameOf(activeChat); $('#cAv').textContent = ini(nameOf(activeChat));
-    const box = $('#msgs'), near = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
-    const ms = msgsFor(activeChat);
-    box.innerHTML = ms.length ? ms.map(m => {
-      const img = safeImg(m.img);
-      return `<div class="bubble ${m.from === me.key ? 'me' : ''}">${m.text ? esc(m.text) : ''}${img ? `<img src="${img}" alt="snap">` : ''}<span class="t">${clock(m.ts)}</span></div>`;
-    }).join('') : '<div class="empty">No messages yet. Say hi! 👋</div>';
-    if (near) box.scrollTop = box.scrollHeight;
-    $('#chatGrid').classList.add('inconv');
-  } else {
-    $('#cName').textContent = 'Select a friend'; $('#cAv').textContent = '';
-    $('#msgs').innerHTML = '<div class="empty">Pick a friend to start chatting.</div>';
-    $('#chatGrid').classList.remove('inconv');
-  }
-}
+    $("sendMessageBtn").addEventListener("click", sendChatMessage);
+    $("messageInput").addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
 
-/* delegated clicks for dynamic content */
-document.addEventListener('click', e => {
-  const t = e.target.closest('[data-pill],[data-acc],[data-dec],[data-cancel],[data-chat],[data-unf],[data-add],[data-delpost]');
-  if (!t) return;
-  const d = t.dataset;
-  if (d.pill){
-    const r = relation(d.pill);
-    if (r === 'none' || r === 'incoming'){ const m = sendRequest(d.pill); if (m) toast(esc(m)); }
-    else if (r === 'friend'){ showTab('chat'); openChat(d.pill); }
-  }
-  if (d.add){ const m = sendRequest(d.add); if (m) toast(esc(m)); }
-  if (d.acc) respond(d.acc, 'accepted');
-  if (d.dec) respond(d.dec, 'declined');
-  if (d.cancel) gReqs.get(d.cancel).put(null);
-  if (d.unf && confirm('Remove this friend?')){
-    const r = Object.values(reqs).find(x => x.status === 'accepted' && ((x.from === me.key && x.to === d.unf) || (x.to === me.key && x.from === d.unf)));
-    if (r) respond(r.id, 'removed');
-  }
-  if (d.chat){ showTab('chat'); openChat(d.chat); }
-  if (d.delpost && confirm('Delete your post?')) gFeed.get(d.delpost).put(null);
-});
+    $("chatPhotoInput").addEventListener("change", async e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !state.activeFriend) return;
+      try {
+        const result = await compressImage(file);
+        const conn = state.connections.get(state.activeFriend);
+        if (!conn || !conn.open || !conn.__authorized) {
+          showNotice("Connect to your friend before sending a photo.", "error");
+          return;
+        }
+        const packet = { type: "chat_photo", id: cryptoId(), from: state.name, photo: result.data, time: Date.now() };
+        if (packet.photo.length > 280000) {
+          showNotice("That image is still too large to send. Choose a smaller photo.", "error");
+          return;
+        }
+        if (!sendPacket(conn, packet)) {
+          showNotice("Photo could not be sent. Check the connection.", "error");
+          return;
+        }
+        addHistory(state.activeFriend, { id: packet.id, from: state.name, photo: packet.photo, text: "", time: packet.time });
+      } catch (err) {
+        showNotice(err.message || "Could not process photo.", "error");
+      } finally {
+        e.target.value = "";
+      }
+    });
 
-/* ============ AUTO LOGIN ============ */
-const saved = store.get('afterbell_user', null);
-if (saved && saved.key && saved.name) startApp({ key: saved.key, name: saved.name });
-else setTimeout(() => $('#nameIn').focus(), 100);
-updStatus();
-</script>
+    $("moodPills").addEventListener("click", e => {
+      const btn = e.target.closest("[data-mood]");
+      if (!btn) return;
+      state.selectedMood = btn.dataset.mood;
+      updateMoodUI();
+      saveDb();
+    });
+
+    $("adviceBtn").addEventListener("click", () => {
+      const mood = state.selectedMood;
+      const note = $("ventBox").value.trim();
+      const advice = {
+        Happy: "Enjoy the good moment. What made today better? You could write it down or share the good news with someone you trust.",
+        Okay: "An okay day still counts. Pick one small thing you can finish, then give yourself permission to rest.",
+        Tired: "Try a short break, some water, and a snack if you need one. You don't have to solve everything while you're exhausted.",
+        Stressed: "Pause and take a few comfortable, slow breaths. Break the next task into one tiny step. If school pressure feels too big, talk with a trusted adult or teacher.",
+        Sad: "You don't have to force yourself to feel cheerful. Try naming what you need right now, and consider reaching out to someone kind and trustworthy.",
+        Excited: "That's great energy! Choose one thing you want to enjoy or work toward, and let yourself celebrate the progress."
+      };
+      const box = $("adviceBox");
+      box.innerHTML = "";
+      const heading = document.createElement("strong");
+      heading.textContent = mood ? "A little advice for your " + mood.toLowerCase() + " day" : "A little advice for today";
+      const para = document.createElement("p");
+      para.textContent = advice[mood] || "Start with what you can control today. Take one small step, and ask someone you trust for help if things feel overwhelming.";
+      para.style.margin = "8px 0 0";
+      box.append(heading, para);
+      box.classList.remove("hidden");
+      addVibe(mood, note);
+    });
+
+    $("photoFile").addEventListener("change", async e => {
+      const file = e.target.files && e.target.files[0];
+      if (file) await usePhotoFile(file);
+      e.target.value = "";
+    });
+
+    $("cameraBtn").addEventListener("click", async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showNotice("Camera access requires HTTPS or localhost and a supported browser.", "error");
+        return;
+      }
+      try {
+        state.cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false
+        });
+        $("cameraVideo").srcObject = state.cameraStream;
+        $("cameraVideo").classList.remove("hidden");
+        $("captureBtn").classList.remove("hidden");
+        $("stopCameraBtn").classList.remove("hidden");
+        $("cameraBtn").classList.add("hidden");
+      } catch (_) {
+        showNotice("Camera permission was denied or the camera is unavailable.", "error");
+      }
+    });
+
+    $("captureBtn").addEventListener("click", async () => {
+      const video = $("cameraVideo");
+      if (!video.videoWidth || !video.videoHeight) {
+        showNotice("Wait until the camera preview is ready.", "error");
+        return;
+      }
+      const canvas = $("photoCanvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+      canvas.toBlob(async blob => {
+        if (blob) await usePhotoFile(new File([blob], "classroom-snap.jpg", { type: "image/jpeg" }));
+        stopCamera();
+      }, "image/jpeg", .85);
+    });
+    $("stopCameraBtn").addEventListener("click", stopCamera);
+
+    $("clearPhotoBtn").addEventListener("click", () => {
+      state.photoData = "";
+      $("photoPreview").removeAttribute("src");
+      $("photoPreview").classList.add("hidden");
+      $("photoInfo").textContent = "";
+      $("clearPhotoBtn").classList.add("hidden");
+    });
+
+    // Keep unread counts consistent and prevent stale notifications from growing indefinitely.
+    window.addEventListener("online", () => {
+      if (state.peer && state.peer.disconnected) {
+        try { state.peer.reconnect(); } catch (_) {}
+      }
+    });
+    window.addEventListener("offline", () => {
+      setStatus("Internet offline", "error");
+    });
+    window.addEventListener("beforeunload", stopCamera);
+
+    // Track incoming channels for accepting requests even before identity is fully mapped.
+    const originalRegisterConnection = registerConnection;
+    // The incoming connection is registered as soon as PeerJS emits "connection".
+    // The hello packet maps the remote name after the data channel opens.
+    // pendingIncoming is intentionally populated in handlePacket on friend requests.
+
+    // Patch the friend-request branch's storage path by using the known open connection.
+    // This also lets the Accept button use the exact channel on which the request arrived.
+    const _handlePacket = handlePacket;
+    // All incoming channels are mapped to their verified username after hello.
+    // Store connection references for friend requests with this wrapper.
+    // (The data handler calls handlePacket dynamically.)
+    handlePacket = function(conn, packet) {
+      if (packet && packet.type === "friend_request" && validName(cleanName(packet.from))) {
+        state.pendingIncoming.set(cleanName(packet.from), conn);
+      }
+      return _handlePacket(conn, packet);
+    };
+
+    // Do not start a fake peer or populate placeholder users; the user chooses a real name.
+  </script>
 </body>
 </html>
