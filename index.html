@@ -2,1229 +2,2791 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f172a">
-<title>AfterBell — Student Mood & Squad Hub</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<title>AfterBell — Student Mood &amp; Squad Hub</title>
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
 <style>
-:root{color-scheme:dark;--bg:#0f172a;--card:#1e293b;--card2:#263449;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--purple:#a78bfa;--blue:#60a5fa;--green:#4ade80;--red:#fb7185}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
-button,input,textarea{font:inherit}
-button{cursor:pointer}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.hidden{display:none!important}
-.muted{color:var(--muted)}
-.small{font-size:12px}
-.btn{padding:10px 14px;border:1px solid var(--border);border-radius:11px;background:var(--card2);color:var(--text)}
-.btn:hover{filter:brightness(1.12)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.gradient{background:linear-gradient(110deg,#a78bfa,#60a5fa);color:#0f172a;border:0;font-weight:800}
-.btn.red{background:#4c1725;border-color:#9f1239;color:#fecdd3}
-.btn.green{background:#14532d;border-color:#166534;color:#bbf7d0}
-input,textarea{width:100%;min-width:0;background:#111c30;color:var(--text);border:1px solid var(--border);border-radius:11px;padding:12px}
-textarea{resize:vertical;min-height:95px}
-label{display:block;margin-bottom:5px}
-.wrap{max-width:1060px;width:calc(100% - 28px);margin:auto}
-header{position:sticky;top:0;z-index:10;background:#0f172af2;backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
-.top{max-width:1060px;width:calc(100% - 28px);margin:auto;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0}
-.brand{font-weight:900;font-size:22px;letter-spacing:-.7px;white-space:nowrap}
-.brand span{color:var(--purple)}
-.header-right{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
-.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
-.dot{width:9px;height:9px;flex-shrink:0;border-radius:50%;background:#64748b}
-.dot.online{background:var(--green);box-shadow:0 0 12px #4ade8066}
-.dot.error{background:var(--red)}
-main{padding:28px 0 45px}
-.card{min-width:0;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:17px}
-.welcome{max-width:470px;margin:6vh auto;padding:27px;background:radial-gradient(ellipse at top right,#4c1d9540,transparent 60%),var(--card);border:1px solid var(--border);border-radius:22px}
-.logo-icon{display:grid;place-items:center;width:49px;height:49px;border-radius:15px;background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#0f172a;font-size:25px;margin-bottom:20px}
-h1{font-size:clamp(29px,5vw,42px);line-height:1.15;letter-spacing:-1px;margin:0 0 15px}
-h2{font-size:21px;margin:0}
-h3{font-size:16px;margin:0 0 12px}
-p{margin-top:0}
-.stack{display:grid;gap:13px}
-.field{display:grid;gap:5px}
-.password-wrap{display:flex;gap:7px}
-.password-wrap input{flex:1}
-.password-wrap button{flex-shrink:0}
-.auth-toggle{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;background:#111c30;border-radius:12px}
-.auth-toggle button{padding:10px 6px;border:0;border-radius:9px;background:transparent;color:var(--muted)}
-.auth-toggle button.active{background:var(--card2);color:var(--text);font-weight:800}
-.error-text{color:#fda4af;font-size:13px}
-.notice{padding:12px 14px;margin-bottom:15px;border-radius:12px;background:#172338;border:1px solid var(--border);overflow-wrap:anywhere}
-.notice.success{border-color:#166534;color:#bbf7d0}
-.notice.error{border-color:#9f1239;color:#fecdd3}
-.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px}
-.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
-.pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.pill{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:#111c30;color:var(--text)}
-.pill.selected{border-color:var(--purple);background:#6d28d933;color:#ddd6fe}
-.advice{margin-top:13px;padding:14px;background:#7c3aed14;border:1px solid #8b5cf644;border-radius:12px}
-.feed-item{padding:12px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
-.feed-item:last-child{border:0}
-.tabs{display:flex;gap:8px;margin:22px 0 16px;border-bottom:1px solid var(--border)}
-.tab{padding:12px 15px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted)}
-.tab.active{color:var(--text);border-bottom-color:var(--purple)}
-.count{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;margin-left:4px;border-radius:99px;background:var(--purple);color:#0f172a;font-size:11px;font-weight:900}
-.list{display:grid;gap:10px}
-.list-item{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:13px;border:1px solid var(--border);border-radius:12px;background:#111c30}
-.list-item>div:first-child{min-width:0;overflow-wrap:anywhere}
-.actions{display:flex;flex-wrap:wrap;gap:7px}
-.row{display:flex;align-items:center;gap:9px}
-.row>*{min-width:0}
-.row .btn{flex-shrink:0}
-.empty{text-align:center;color:var(--muted);padding:23px 10px}
-.chat-layout{display:grid;grid-template-columns:minmax(150px,.7fr) minmax(0,1.5fr);gap:14px}
-.friend-choice{width:100%;text-align:left;margin-bottom:7px;overflow-wrap:anywhere}
-.friend-choice.active{border-color:var(--purple);background:#6d28d933}
-.chat-box{display:flex;flex-direction:column;min-height:360px;min-width:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#111c30}
-.chat-head{padding:13px;border-bottom:1px solid var(--border);font-weight:800}
-.messages{display:flex;flex-direction:column;gap:10px;flex:1;min-height:220px;max-height:420px;overflow-y:auto;padding:14px}
-.bubble{align-self:flex-start;max-width:85%;padding:10px 12px;border-radius:13px;background:#263449;overflow-wrap:anywhere}
-.bubble.mine{align-self:flex-end;background:#4c1d95}
-.bubble img{display:block;max-width:100%;max-height:280px;border-radius:8px;margin-top:5px}
-.composer{display:grid;gap:9px;padding:12px;border-top:1px solid var(--border)}
-.composer textarea{min-height:64px}
-.photo-preview{width:100%;max-height:240px;object-fit:contain;background:#111c30;border-radius:12px}
-.footer{text-align:center;margin-top:24px;color:var(--muted);font-size:12px}
-@media(max-width:700px){
- .top{align-items:flex-start}.header-right{gap:8px}.brand{font-size:19px}
- .grid,.chat-layout{grid-template-columns:1fr}
- .card{padding:15px}.welcome{padding:22px}
- .list-item{align-items:flex-start;flex-direction:column}
+:root {
+  color-scheme: dark;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card-alt: #172033;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --blue: #3b82f6;
+  --blue-light: #60a5fa;
+  --purple: #8b5cf6;
+  --border: #334155;
+  --red: #ef4444;
+  --green: #22c55e;
+  --input: #0f172a;
+  --gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --shadow: 0 12px 35px rgba(0,0,0,.2);
 }
+
+* { box-sizing: border-box; }
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(37,99,235,.17), transparent 35%),
+    radial-gradient(ellipse at 95% 12%, rgba(124,58,237,.15), transparent 32%),
+    linear-gradient(155deg, #0f172a 0%, #111c32 48%, #0b1120 100%);
+  background-attachment: fixed;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, textarea { font: inherit; }
+
+button {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 15px;
+  color: #fff;
+  background: var(--gradient);
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform .16s ease, filter .16s ease, border-color .16s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) { transform: translateY(0); }
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+input, textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--input);
+  outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+input::placeholder, textarea::placeholder { color: #64748b; }
+
+input:focus, textarea:focus {
+  border-color: var(--blue-light);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+textarea { resize: vertical; }
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(71,85,105,.65);
+  background: rgba(15,23,42,.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.header-inner {
+  display: flex;
+  max-width: 1200px;
+  margin: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--gradient);
+  box-shadow: 0 5px 20px rgba(99,102,241,.28);
+  color: white;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 850;
+  letter-spacing: -.65px;
+}
+
+.brand p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid rgba(59,130,246,.28);
+  border-radius: 99px;
+  color: #93c5fd;
+  background: rgba(37,99,235,.13);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.verified {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  vertical-align: -3px;
+}
+
+#connectionStatus {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+main {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 17px 36px;
+}
+
+.card {
+  margin-bottom: 16px;
+  padding: 19px;
+  border: 1px solid rgba(71,85,105,.68);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(30,41,59,.97), rgba(23,32,51,.98));
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  margin: 0 0 13px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -.2px;
+}
+
+.card h3 {
+  margin: 0 0 9px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.subtle {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.stack {
+  display: grid;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.row > * { min-width: 0; }
+.row input { flex: 1; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 305px minmax(0, 1fr);
+  align-items: start;
+  gap: 17px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.section-head h2 { margin: 0; }
+
+.small-button {
+  padding: 7px 11px;
+  font-size: 11px;
+}
+
+.secondary {
+  border-color: #475569;
+  color: #e2e8f0;
+  background: #29364c;
+}
+
+.secondary:hover:not(:disabled) { background: #334155; }
+
+.user-list {
+  display: grid;
+  gap: 9px;
+}
+
+.user-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: rgba(15,23,42,.48);
+  transition: border-color .16s ease, background .16s ease;
+}
+
+.user-item:hover {
+  border-color: #475569;
+  background: rgba(30,41,59,.8);
+}
+
+.avatar {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(96,165,250,.2);
+  border-radius: 12px;
+  color: #bfdbfe;
+  background: linear-gradient(145deg, #1d4ed8, #6d28d9);
+  font-weight: 900;
+}
+
+.user-info { flex: 1; min-width: 0; }
+
+.user-name {
+  overflow-wrap: anywhere;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.user-status {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.empty {
+  padding: 20px 13px;
+  border: 1px dashed #475569;
+  border-radius: 12px;
+  color: #94a3b8;
+  background: rgba(15,23,42,.3);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.mood {
+  padding: 10px 3px;
+  border-color: #334155;
+  color: #e2e8f0;
+  background: #172033;
+  font-size: 19px;
+}
+
+.mood span {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.mood:hover:not(:disabled) {
+  border-color: #64748b;
+  background: #26344a;
+}
+
+.mood.active {
+  border-color: #60a5fa;
+  background: linear-gradient(145deg, rgba(37,99,235,.35), rgba(124,58,237,.28));
+  box-shadow: 0 0 0 2px rgba(59,130,246,.12);
+}
+
+.feed-item {
+  margin-bottom: 9px;
+  padding: 12px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  color: #e2e8f0;
+  background: rgba(15,23,42,.45);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.feed-item:last-child { margin-bottom: 0; }
+
+.feed-meta {
+  margin-bottom: 7px;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.chat-card {
+  display: flex;
+  min-height: 500px;
+  flex-direction: column;
+}
+
+.chat-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chat-title h2 { margin: 0; }
+
+#chatMessages {
+  display: flex;
+  min-height: 230px;
+  max-height: 430px;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 14px 3px;
+  scrollbar-color: #475569 transparent;
+}
+
+.message {
+  max-width: 85%;
+  align-self: flex-start;
+  padding: 10px 13px;
+  border: 1px solid #334155;
+  border-radius: 14px 14px 14px 4px;
+  color: #e2e8f0;
+  background: #29364b;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.message.mine {
+  align-self: flex-end;
+  border-color: rgba(96,165,250,.25);
+  border-radius: 14px 14px 4px 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #5b35c9);
+}
+
+.message .meta {
+  margin-bottom: 5px;
+  color: #cbd5e1;
+  font-size: 10px;
+  opacity: .85;
+}
+
+.message.mine .meta { color: #dbeafe; }
+
+.message img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 350px;
+  margin-top: 7px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 9px;
+  object-fit: contain;
+}
+
+.chat-compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.chat-compose textarea {
+  min-height: 43px;
+  max-height: 130px;
+  resize: vertical;
+}
+
+.chat-compose button { align-self: stretch; }
+
+.notice {
+  margin-top: 10px;
+  padding: 11px 13px;
+  border: 1px solid rgba(96,165,250,.25);
+  border-radius: 11px;
+  color: #bfdbfe;
+  background: rgba(37,99,235,.12);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.notice.error {
+  border-color: rgba(248,113,113,.3);
+  color: #fecaca;
+  background: rgba(220,38,38,.12);
+}
+
+.notice.success {
+  border-color: rgba(74,222,128,.25);
+  color: #bbf7d0;
+  background: rgba(22,163,74,.12);
+}
+
+.request {
+  margin-bottom: 8px;
+  padding: 11px;
+  border: 1px solid #334155;
+  border-radius: 11px;
+  background: rgba(15,23,42,.42);
+  font-size: 12px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.request-actions button {
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
+.badge-admin {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 3px 6px;
+  border: 1px solid rgba(167,139,250,.28);
+  border-radius: 6px;
+  color: #ddd6fe;
+  background: rgba(124,58,237,.17);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.panel {
+  border-color: rgba(139,92,246,.55);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(124,58,237,.13), transparent 45%),
+    linear-gradient(145deg, rgba(30,41,59,.98), rgba(23,32,51,.98));
+}
+
+.hidden { display: none !important; }
+
+.divider {
+  height: 1px;
+  margin: 15px 0;
+  background: linear-gradient(90deg, transparent, #475569, transparent);
+}
+
+.auth-wrap {
+  max-width: 450px;
+  margin: 7vh auto;
+  padding: 0 16px;
+}
+
+.auth-card {
+  padding: 25px;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(124,58,237,.14), transparent 45%),
+    linear-gradient(145deg, #1e293b, #172033);
+  box-shadow: 0 25px 70px rgba(0,0,0,.35);
+}
+
+.auth-logo {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 17px;
+  place-items: center;
+  border-radius: 17px;
+  color: #fff;
+  background: var(--gradient);
+  box-shadow: 0 8px 25px rgba(99,102,241,.3);
+  font-size: 27px;
+  font-weight: 950;
+}
+
+.auth-card h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  letter-spacing: -.6px;
+}
+
+.auth-card p {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin: 19px 0;
+  padding: 5px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #0f172a;
+}
+
+.tabs button {
+  border-color: transparent;
+  color: #94a3b8;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tabs button.active {
+  border-color: #475569;
+  color: #fff;
+  background: linear-gradient(135deg, #26364f, #29304d);
+}
+
+#authError {
+  min-height: 18px;
+  color: #fca5a5;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.auth-card label { color: #cbd5e1; }
+
+.auth-card .subtle { font-size: 11px; }
+
+.locked-wrap {
+  max-width: 490px;
+  margin: 12vh auto;
+  padding: 16px;
+}
+
+.locked-card {
+  padding: 27px;
+  border: 1px solid rgba(248,113,113,.4);
+  border-radius: 19px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(220,38,38,.13), transparent 60%),
+    linear-gradient(145deg, #1e293b, #172033);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.lock-icon { margin-bottom: 13px; font-size: 40px; }
+
+.locked-card h1 { font-size: 22px; }
+
+.locked-card p {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+footer {
+  padding: 0 15px 26px;
+  color: #64748b;
+  text-align: center;
+  font-size: 11px;
+}
+
+#photoInput { display: none; }
+
+@media (max-width: 850px) {
+  .layout { grid-template-columns: 1fr; }
+  .chat-card { min-height: 420px; }
+  main { margin-top: 17px; }
+}
+
+@media (max-width: 520px) {
+  header { padding: 11px 13px; }
+  main { padding: 0 11px 25px; }
+  .card { padding: 14px; border-radius: 14px; }
+  .profile { width: 100%; justify-content: space-between; }
+  .mood-grid { gap: 3px; }
+  .mood { padding: 9px 1px; font-size: 17px; }
+  .mood span { font-size: 8px; }
+  .auth-card { padding: 20px; }
+  .chat-compose { grid-template-columns: minmax(0, 1fr) auto; }
+  .message { max-width: 92%; }
+  .row { gap: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* AfterBell Public Edition additions */
+.profile-actions { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+.profile-actions button { padding:6px 9px; font-size:10px; }
+#banModal { position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(2,6,23,.78); }
+#banModal.hidden { display:none; }
+.ban-modal-card { width:min(420px,100%); padding:24px; border:1px solid rgba(96,165,250,.35); border-radius:17px; background:linear-gradient(145deg,rgba(30,41,59,.99),rgba(23,32,51,.99)); box-shadow:0 22px 60px rgba(0,0,0,.45); }
+.ban-modal-card h2 { margin:0 0 10px; font-size:18px; }
+.ban-modal-card p { color:var(--muted); line-height:1.6; font-size:13px; }
+#toastBanner { position:fixed; z-index:9999; top:16px; left:50%; transform:translateX(-50%); max-width:min(560px,calc(100vw - 28px)); padding:12px 18px; border:1px solid rgba(96,165,250,.4); border-radius:12px; color:#eff6ff; background:#1e3a5f; box-shadow:var(--shadow); font-size:13px; font-weight:800; }
+#toastBanner.hidden { display:none; }
+.group-messages { max-height:260px; overflow:auto; display:grid; gap:8px; margin:12px 0; }
+.group-message { padding:9px 11px; border:1px solid var(--border); border-radius:10px; background:rgba(15,23,42,.55); overflow-wrap:anywhere; }
+.group-message strong { color:#93c5fd; font-size:12px; }
+.group-message p { margin:4px 0 0; white-space:pre-wrap; }
+.group-card { margin-top:12px; padding:12px; border:1px solid var(--border); border-radius:12px; background:rgba(15,23,42,.35); }
+.group-member-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:6px; margin:9px 0; }
+.group-member-list label { display:flex; align-items:center; gap:7px; padding:7px; border:1px solid var(--border); border-radius:8px; font-size:12px; }
+.group-member-list input { width:auto; }
+
+
+/* Profile picture additions */
+.avatar { overflow: hidden; }
+.avatar img { display:block; width:100%; height:100%; object-fit:cover; }
+#avatarModal { position:fixed; inset:0; z-index:500; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(2,6,23,.78); }
+.avatar-modal-card { width:min(400px,100%); padding:26px; border:1px solid rgba(96,165,250,.35); border-radius:19px; background:linear-gradient(145deg,rgba(30,41,59,.99),rgba(23,32,51,.99)); box-shadow:0 22px 60px rgba(0,0,0,.45); text-align:center; }
+.avatar-modal-card h2 { margin:0 0 8px; font-size:19px; }
+.avatar-modal-card .row > button { flex:1; }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AfterBell">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
-<header>
- <div class="top">
-  <div class="brand">After<span>Bell</span></div>
-  <div class="header-right">
-   <div id="headerUser" class="hidden"><strong id="headerName"></strong></div>
-   <div class="status" aria-live="polite"><span id="statusDot" class="dot"></span><span id="statusText">Sign in to continue</span></div>
-   <button id="logoutBtn" class="btn red hidden" type="button">Log Out ↗</button>
+
+<div id="authScreen" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">A</div>
+    <h1>Welcome to AfterBell</h1>
+    <p>Your student mood, daily vibe and squad hub. Sign in or create a local account to get started.</p>
+
+    <div class="tabs">
+      <button id="loginTab" class="active" type="button">Log In</button>
+      <button id="signupTab" type="button">Sign Up</button>
+    </div>
+
+    <form id="authForm" class="stack">
+      <div>
+        <label for="authUsername" style="display:block;margin-bottom:6px;font-size:12px;font-weight:750">Username</label>
+        <input id="authUsername" autocomplete="username" maxlength="40" required placeholder="Choose a username">
+      </div>
+      <div>
+        <label for="authPassword" style="display:block;margin-bottom:6px;font-size:12px;font-weight:750">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" maxlength="128" required placeholder="At least 6 characters">
+      </div>
+      <div id="authError" role="alert"></div>
+      <button id="authSubmit" type="submit">Log In</button>
+    </form>
+
+    <p class="subtle">Accounts in this edition are stored in this browser. Do not reuse passwords from other accounts.</p>
   </div>
- </div>
+</div>
+
+<div id="lockedScreen" class="locked-wrap hidden" aria-hidden="true"></div>
+<div id="banModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="banModalTitle">
+  <div class="ban-modal-card">
+    <h2 id="banModalTitle">You are banned</h2>
+    <p id="banModalMessage">You have been banned by AfterBell Admin. Your account has been removed. Press OK to return to the Log In / Sign Up page.</p>
+    <button id="banModalOk" type="button">OK</button>
+  </div>
+</div>
+<div id="toastBanner" class="hidden" role="status" aria-live="polite"></div>
+
+<div id="appScreen" class="hidden">
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <h1>AfterBell <span style="color:#60a5fa">✦</span></h1>
+        <p>Student Mood &amp; Squad Hub</p>
+      </div>
+    </div>
+
+    <div class="profile">
+      <span id="headerName" style="font-weight:800"></span>
+      <span id="rolePill" class="pill hidden">MODERATOR</span>
+      <span id="connectionStatus">Connecting…</span>
+      <button id="logoutButton" class="secondary small-button" type="button">Log Out</button>
+    </div>
+  </div>
 </header>
 
-<main class="wrap">
- <section id="welcomeScreen" class="welcome">
-  <div class="logo-icon">✦</div>
-  <p class="muted small" style="font-weight:800;letter-spacing:2px">YOUR SPACE AFTER THE BELL</p>
-  <h1>School days are a lot.<br><span style="color:#a78bfa">You don't have to figure it all out alone.</span></h1>
-  <p class="muted">Check in with yourself, get advice, and connect with your squad.</p>
-
-  <div class="auth-toggle" style="margin:22px 0 17px">
-   <button id="loginTab" class="active" type="button">Log In</button>
-   <button id="signupTab" type="button">Create Account</button>
-  </div>
-
-  <form id="authForm" class="stack">
-   <div class="field">
-    <label for="authUsername">Username</label>
-    <input id="authUsername" maxlength="24" autocomplete="username" placeholder="e.g. Rook" required>
-    <span class="small muted">1–24 characters: letters, numbers, underscores.</span>
-   </div>
-   <div class="field">
-    <label for="authPassword">Password</label>
-    <div class="password-wrap">
-     <input id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="At least 8 characters" required>
-     <button id="togglePassword" class="btn" type="button" aria-label="Show password">👁</button>
+<main>
+  <section id="moderatorPanel" class="card panel hidden">
+    <div class="section-head">
+      <h2>Moderator Panel</h2>
+      <span class="badge-admin">ADMIN</span>
     </div>
-   </div>
-   <div id="authError" class="error-text hidden" role="alert"></div>
-   <button id="authSubmit" class="btn gradient" type="submit">Log In →</button>
-  </form>
-  <p class="small muted" style="margin:15px 0 0">Accounts are stored on this device. This demo does not have a server to synchronize passwords or accounts between devices.</p>
- </section>
-
- <section id="appScreen" class="hidden">
-  <div id="globalNotice" class="notice hidden" role="status" aria-live="polite"></div>
-
-  <div class="section-title">
-   <div><p class="muted small" style="margin-bottom:4px">WELCOME BACK</p><h2>Hey, <span id="displayName"></span> ✨</h2></div>
-  </div>
-
-  <div class="grid">
-   <section class="card">
-    <div class="section-title"><h2>After-School Feelings &amp; Advice</h2><span>🌤️</span></div>
-    <p class="muted">How's your day actually going?</p>
-    <div id="moodPills" class="pills">
-     <button class="pill" data-mood="Happy" type="button">😊 Happy</button>
-     <button class="pill" data-mood="Okay" type="button">🙂 Okay</button>
-     <button class="pill" data-mood="Tired" type="button">😴 Tired</button>
-     <button class="pill" data-mood="Stressed" type="button">😵 Stressed</button>
-     <button class="pill" data-mood="Sad" type="button">🌧️ Sad</button>
-     <button class="pill" data-mood="Excited" type="button">⚡ Excited</button>
+    <p class="subtle">Send a ban signal to a connected non-Founder user.</p>
+    <div class="row">
+      <input id="moderatorTarget" maxlength="40" placeholder="ban:username">
+      <button id="moderatorBanButton" type="button">Ban User</button>
     </div>
-    <label for="ventBox">Want to get something off your chest?</label>
-    <textarea id="ventBox" maxlength="1200" placeholder="Write it out. You don't have to make it sound perfect..."></textarea>
-    <div class="row" style="justify-content:space-between;flex-wrap:wrap;margin-top:12px">
-     <span class="small muted">Your check-in stays on this device.</span>
-     <button id="adviceBtn" class="btn gradient" type="button">Get advice ✨</button>
-    </div>
-    <div id="adviceBox" class="advice hidden" aria-live="polite"></div>
-    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
-     <h3>Daily Vibe Feed</h3>
-     <p class="small muted">Your own recent check-ins. Nothing is posted publicly automatically.</p>
-     <div id="vibeFeed"><div class="empty">Your first vibe starts here.</div></div>
-    </div>
-   </section>
-
-   <div class="stack">
-    <section class="card">
-     <div class="section-title"><h2>Optional Classroom Snap</h2><span>📸</span></div>
-     <p class="muted small">Take a picture or upload one. Images are compressed to a maximum 350px JPEG before chat sharing.</p>
-     <div class="stack">
-      <label for="photoFile">Choose an image</label>
-      <input id="photoFile" type="file" accept="image/*">
-      <button id="cameraBtn" class="btn" type="button">Open camera</button>
-      <video id="cameraVideo" class="photo-preview hidden" autoplay playsinline muted></video>
-      <div class="row"><button id="captureBtn" class="btn hidden" type="button">Capture</button><button id="stopCameraBtn" class="btn hidden" type="button">Close camera</button></div>
-      <canvas id="photoCanvas" class="hidden"></canvas>
-      <img id="photoPreview" class="photo-preview hidden" alt="Compressed photo preview">
-      <p id="photoInfo" class="small muted"></p>
-      <button id="clearPhotoBtn" class="btn hidden" type="button">Remove photo</button>
-     </div>
-    </section>
-    <section class="card">
-     <div class="section-title"><h2>Connection details</h2><span>🔗</span></div>
-     <p class="small muted">Share your username with a friend so they can find your PeerJS ID.</p>
-     <div class="small muted">Your Peer ID</div>
-     <p id="peerIdLabel" style="overflow-wrap:anywhere;font-weight:700">Not connected</p>
-     <button id="copyIdBtn" class="btn" type="button">Copy Peer ID</button>
-     <p class="small muted" style="margin:12px 0 0">Keep this page open on both devices. HTTPS is required for camera access.</p>
-    </section>
-   </div>
-  </div>
-
-  <nav class="tabs" aria-label="Squad and chat tabs">
-   <button class="tab active" data-tab="squad" type="button">Squad <span id="requestBadge" class="count hidden">0</span></button>
-   <button class="tab" data-tab="chat" type="button">Chat <span id="chatBadge" class="count hidden">0</span></button>
-  </nav>
-
-  <section id="squadTab" class="card">
-   <div class="section-title"><h2>Your Squad</h2><span>👥</span></div>
-   <form id="addFriendForm" class="row" style="margin-bottom:14px">
-    <input id="friendNameInput" maxlength="24" placeholder="Friend's exact username" required>
-    <button class="btn gradient" type="submit">Send</button>
-   </form>
-   <p class="small muted">Both users must be online. PeerJS IDs are public and this demo does not provide server-side identity verification.</p>
-   <h3 style="margin-top:22px">Friend requests <span id="requestCount" class="muted"></span></h3>
-   <div id="requestList" class="list"><div class="empty">No friend requests yet.</div></div>
-   <h3 style="margin-top:22px">Squad members</h3>
-   <div id="squadList" class="list"><div class="empty">Your squad is waiting for friends.</div></div>
-   <h3 style="margin-top:22px">Notifications</h3>
-   <div id="notificationList" class="list"><div class="empty">You're all caught up.</div></div>
+    <div id="moderatorNotice" class="notice">Moderator privileges enabled.</div>
   </section>
 
-  <section id="chatTab" class="card hidden">
-   <div class="section-title"><h2>1-on-1 Chat</h2><span>💬</span></div>
-   <p class="small muted">Text and compressed photos travel through a direct PeerJS data connection. Offline messages are not delivered.</p>
-   <div class="chat-layout">
-    <div><h3>Your Squad</h3><div id="chatFriendList"><div class="empty">Accept a friend request to start chatting.</div></div></div>
-    <div class="chat-box">
-     <div id="chatHeader" class="chat-head">Choose a squad member</div>
-     <div id="messageList" class="messages"><div class="empty">Your conversation will appear here.</div></div>
-     <div class="composer">
-      <textarea id="messageInput" maxlength="3000" placeholder="Write a message…" disabled></textarea>
-      <div class="row">
-       <label class="btn" for="chatPhotoInput" style="cursor:pointer;margin:0">Attach photo</label>
-       <input id="chatPhotoInput" class="hidden" type="file" accept="image/*" disabled>
-       <button id="sendMessageBtn" class="btn gradient" type="button" disabled>Send ↗</button>
-      </div>
-      <p id="chatStatus" class="small muted" style="margin:0">Choose a friend to begin.</p>
-     </div>
-    </div>
-   </div>
+  <section id="founderPanel" class="card panel hidden">
+    <div class="section-head"><h2>Founder Control Panel</h2><span class="badge-admin">FOUNDER TOOLS</span></div>
+    <p class="subtle">Unlocked for this account by a command from the Founder connection.</p>
+    <div class="row"><input id="founderBanTarget" maxlength="40" placeholder="Username to ban"><button id="founderBanButton" type="button">Ban</button></div>
+    <div class="row" style="margin-top:8px"><input id="founderAdminTarget" maxlength="40" placeholder="Username to give admin"><button id="founderAdminButton" type="button">Give Admin</button></div>
+    <div class="row" style="margin-top:8px"><input id="founderBlueTarget" maxlength="40" placeholder="Username to bluetick"><button id="founderBlueButton" type="button">Bluetick</button></div>
+    <div class="row" style="margin-top:8px"><input id="founderAllAdminTarget" maxlength="40" placeholder="Username to give all admin"><button id="founderAllAdminButton" type="button">Give All Admin</button></div>
+    <div id="founderNotice" class="notice">Founder controls are unlocked.</div>
   </section>
-  <p class="footer">AfterBell · Be kind to yourself and your squad.</p>
- </section>
+
+  <div class="layout">
+    <aside>
+      <section class="card">
+        <div class="section-head">
+          <h2>My Profile</h2>
+          <span id="myRole" class="pill">MEMBER</span>
+        </div>
+
+        <div class="user-item">
+          <div id="myAvatar" class="avatar">U</div>
+          <div class="user-info">
+            <div id="myName" class="user-name"></div>
+            <div id="myStatus" class="user-status">Online</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <button id="changeAvatarButton" class="secondary small-button" type="button" style="width:100%;margin-bottom:12px">📷 Change Profile Picture</button>
+        <div class="divider"></div>
+        <h3>Connect to a Squad Member</h3>
+        <p class="subtle">Enter the exact username of a friend already using AfterBell.</p>
+
+        <div class="stack">
+          <input id="connectUsername" maxlength="40" placeholder="Friend's username">
+          <button id="connectButton" type="button">Connect</button>
+        </div>
+        <div id="connectNotice" class="subtle" style="margin-top:9px"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Squad</h2>
+          <span id="squadCount" class="pill">0 online</span>
+        </div>
+        <div id="squadList" class="user-list">
+          <div class="empty">No connected members yet.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Daily Mood Check-in</h2>
+        <p class="subtle">How are you feeling today?</p>
+
+        <div class="mood-grid">
+          <button class="mood" data-mood="Amazing" type="button">😄<span>Amazing</span></button>
+          <button class="mood" data-mood="Good" type="button">🙂<span>Good</span></button>
+          <button class="mood" data-mood="Okay" type="button">😐<span>Okay</span></button>
+          <button class="mood" data-mood="Low" type="button">😔<span>Low</span></button>
+          <button class="mood" data-mood="Stressed" type="button">😵‍💫<span>Stressed</span></button>
+        </div>
+
+        <div id="moodNotice" class="subtle" style="margin-top:10px">Choose a mood to share it with connected friends.</div>
+      </section>
+
+      <section class="card">
+        <h2>Friend Requests</h2>
+        <div id="incomingRequests">
+          <div class="empty">No incoming requests.</div>
+        </div>
+        <div class="divider"></div>
+        <h3>Send a Friend Request</h3>
+        <div class="row">
+          <input id="requestUsername" maxlength="40" placeholder="Username">
+          <button id="requestButton" class="small-button" type="button">Send</button>
+        </div>
+      </section>
+    </aside>
+
+    <section>
+      <section class="card">
+        <div class="section-head">
+          <h2>Daily Vibe Feed</h2>
+          <button id="refreshFeedButton" class="secondary small-button" type="button">Refresh</button>
+        </div>
+
+        <p class="subtle">Share a positive update with your connected squad.</p>
+        <div class="stack">
+          <textarea id="vibeInput" maxlength="280" rows="2" placeholder="What's your vibe today?"></textarea>
+          <button id="postVibeButton" type="button">Post Vibe</button>
+        </div>
+
+        <div class="divider"></div>
+        <div id="vibeFeed">
+          <div class="empty">Your daily vibe feed will appear here.</div>
+        </div>
+      </section>
+
+      <section class="card chat-card">
+        <div class="chat-title">
+          <div>
+            <h2>1-on-1 Chat</h2>
+            <div id="chatPartner" class="subtle" style="margin-top:5px">Select a connected squad member.</div>
+          </div>
+          <span id="chatState" class="pill">Not connected</span>
+        </div>
+
+        <div id="chatMessages">
+          <div class="empty">Your private conversation will appear here.</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="chat-compose">
+          <textarea id="chatInput" rows="1" maxlength="2000" placeholder="Write a message…"></textarea>
+          <button id="sendButton" type="button">Send</button>
+        </div>
+
+        <div class="row" style="margin-top:9px;flex-wrap:wrap">
+          <button id="photoButton" class="secondary small-button" type="button">📷 Send Photo</button>
+          <input id="photoInput" class="hidden" type="file" accept="image/*">
+          <span class="subtle">Photos are compressed to a maximum dimension of 350px.</span>
+        </div>
+        <div id="photoNotice" class="subtle" style="margin-top:7px"></div>
+      </section>
+
+      <section class="card" id="groupsPanel">
+        <div class="section-head"><h2>Group Chats</h2><span class="pill" id="groupCount">0 groups</span></div>
+        <div class="row"><input id="groupNameInput" maxlength="40" placeholder="New group name"><button id="createGroupButton" type="button">Create Group</button></div>
+        <p class="subtle" style="margin-top:8px">Choose connected Squad members to invite.</p>
+        <div id="groupMemberChoices" class="group-member-list"></div>
+        <div id="groupsList"></div>
+      </section>
+    </section>
+  </div>
 </main>
 
+<footer>AfterBell · Student Mood &amp; Squad Hub · PeerJS</footer>
+</div>
+
+<div id="avatarModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle">
+  <div class="avatar-modal-card">
+    <h2 id="avatarModalTitle">Profile picture</h2>
+    <p id="avatarModalText" class="subtle"></p>
+    <div id="avatarPreview" class="avatar" style="width:104px;height:104px;margin:14px auto;border-radius:26px;font-size:40px"></div>
+    <input id="avatarFile" class="hidden" type="file" accept="image/*">
+    <div id="avatarNotice" class="subtle" style="min-height:18px;margin-bottom:10px"></div>
+    <div class="row">
+      <button id="avatarChoose" class="secondary" type="button">Choose photo</button>
+      <button id="avatarRemove" class="secondary hidden" type="button">Remove</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="avatarSkip" class="secondary" type="button">Skip for now</button>
+      <button id="avatarSave" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
+(() => {
 "use strict";
 
-/*
-  DEMO SECURITY:
-  The requested localStorage account system stores passwords on this device
-  and is not suitable for real authentication. A real service needs a backend,
-  password hashing, secure sessions, and server-side identity verification.
-
-  Deterministic Peer IDs mean only ONE active connection can own a username
-  at a time on a given PeerJS signaling service. Signing in on another device
-  with the same username may fail while the first session is online.
-*/
-
-const $ = id => document.getElementById(id);
 const PREFIX = "afterbell_pg_2026_";
-const ACCOUNT_KEY = "afterbell_accounts";
-const DB_KEY = "afterbell_state_v2";
-const SESSION_KEY = "afterbell_active_user";
-const MAX_IMAGE_SIDE = 350;
-const MAX_PHOTO_CHARS = 280000;
-const MAX_HISTORY = 100;
+const FOUNDER_ID = PREFIX + "afterbell";
+const RESERVED = new Set(["afterbell", "tashwiin"]);
 
-const state = {
-  name: "",
-  peer: null,
-  peerOpened: false,
-  peerId: "",
-  connections: new Map(),
-  pendingIncoming: new Map(),
-  pendingOutgoing: new Set(),
-  requests: [],
-  squad: [],
-  notifications: [],
-  histories: {},
-  unread: {},
-  activeFriend: "",
-  selectedMood: "",
-  cameraStream: null,
-  feeds: [],
-  noticeTimer: null
+const KEYS = {
+  accounts: "afterbell_public_accounts_v1",
+  session: "afterbell_public_session_v1",
+  banned: "afterbell_banned",
+  profiles: "afterbell_public_profiles_v1",
+  vibes: "afterbell_public_vibes_v1",
+  friends: "afterbell_public_friends_v1",
+  messages: "afterbell_public_messages_v1",
+  blockedUsers: "afterbell_public_blocked_users_v1",
+  follows: "afterbell_public_follows_v1",
+  groups: "afterbell_public_groups_v1"
 };
 
-let authMode = "login";
+const state = {
+  mode: "login",
+  currentUser: null,
+  peer: null,
+  peerId: null,
+  connections: new Map(),
+  users: new Map(),
+  friendRequests: new Map(),
+  friends: new Set(),
+  verifiedUsers: new Set(),
+  admins: new Set(),
+  activePeerId: null,
+  selectedMoods: new Map(),
+  processedCommandIds: new Set(),
+  founderPanelUnlocked: false,
+  followers: new Map(),
+  following: new Set(),
+  groups: [],
+  activeGroupId: null,
+  toastTimer: null
+};
 
-function cleanName(value) {
-  return String(value || "").trim();
-}
-function validName(name) {
-  return /^[a-zA-Z0-9_]{1,24}$/.test(name);
-}
-function peerIdFor(name) {
-  return PREFIX + name.toLowerCase();
-}
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
-}
-function newId() {
-  try { return crypto.randomUUID(); }
-  catch (_) { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-}
-function readAccounts() {
-  try {
-    const value = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "[]");
-    return Array.isArray(value) ? value : [];
-  } catch (_) { return []; }
-}
-function readDb() {
-  try {
-    const value = JSON.parse(localStorage.getItem(DB_KEY) || "{}");
-    return value && typeof value === "object" ? value : {};
-  } catch (_) { return {}; }
-}
-function saveDb() {
-  if (!state.name) return;
-  const db = readDb();
-  db[state.name] = {
-    squad: state.squad,
-    histories: state.histories,
-    notifications: state.notifications.slice(0,60),
-    selectedMood: state.selectedMood,
-    feeds: state.feeds.slice(0,8)
-  };
-  try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
-  catch (_) { showNotice("Could not save local data. Your browser storage may be full.", "error"); }
-}
-function restoreDb() {
-  const saved = readDb()[state.name] || {};
-  state.squad = Array.isArray(saved.squad) ? saved.squad.filter(n => n !== state.name) : [];
-  state.histories = saved.histories && typeof saved.histories === "object" ? saved.histories : {};
-  state.notifications = Array.isArray(saved.notifications) ? saved.notifications : [];
-  state.selectedMood = saved.selectedMood || "";
-  state.feeds = Array.isArray(saved.feeds) ? saved.feeds.slice(0,8) : [];
-  state.unread = {};
-  state.squad.forEach(n => { state.histories[n] ||= []; });
-  updateMoodUI();
-  renderFeed();
-  renderAll();
-}
-function showNotice(message, type = "") {
-  const el = $("globalNotice");
-  el.textContent = message;
-  el.className = "notice" + (type ? " " + type : "");
-  clearTimeout(state.noticeTimer);
-  state.noticeTimer = setTimeout(() => el.classList.add("hidden"), 7000);
-}
-function setStatus(message, type = "") {
-  $("statusText").textContent = message;
-  $("statusDot").className = "dot" + (type ? " " + type : "");
-}
-function addNotification(message) {
-  state.notifications.unshift({ id:newId(), text:message, time:Date.now() });
-  state.notifications = state.notifications.slice(0,60);
-  saveDb();
-  renderNotifications();
-}
-function addSquad(name) {
-  if (!name || name === state.name) return;
-  if (!state.squad.includes(name)) state.squad.push(name);
-  state.histories[name] ||= [];
-  saveDb();
-  renderAll();
-}
-function isConnected(name) {
-  const c = state.connections.get(name);
-  return !!c && c.open === true;
-}
-function renderAll() {
-  renderRequests();
-  renderSquad();
-  renderNotifications();
-  renderChat();
-  renderBadges();
-}
-function renderBadges() {
-  const count = state.requests.length;
-  $("requestBadge").textContent = count;
-  $("requestBadge").classList.toggle("hidden", !count);
-  $("requestCount").textContent = count ? "(" + count + ")" : "";
-  const unread = Object.values(state.unread).reduce((a,b) => a+b, 0);
-  $("chatBadge").textContent = unread;
-  $("chatBadge").classList.toggle("hidden", !unread);
-}
-function renderRequests() {
-  const el = $("requestList");
-  if (!state.requests.length) {
-    el.innerHTML = '<div class="empty">No friend requests yet.</div>';
-    renderBadges();
-    return;
-  }
-  el.innerHTML = state.requests.map(r => `
-    <div class="list-item">
-      <div><strong>${escapeHtml(r.from)}</strong><div class="small muted">Wants to join your squad</div></div>
-      <div class="actions">
-       <button class="btn green" type="button" data-accept="${escapeHtml(r.from)}">Accept</button>
-       <button class="btn red" type="button" data-decline="${escapeHtml(r.from)}">Decline</button>
-      </div>
-    </div>`).join("");
-  renderBadges();
-}
-function renderSquad() {
-  const el = $("squadList");
-  if (!state.squad.length) {
-    el.innerHTML = '<div class="empty">Your squad is waiting for friends.</div>';
-    return;
-  }
-  el.innerHTML = state.squad.map(name => `
-    <div class="list-item">
-      <div class="row"><span class="dot ${isConnected(name)?"online":""}"></span>
-       <div><strong>${escapeHtml(name)}</strong><div class="small muted">${isConnected(name)?"Connected":"Not connected"}</div></div>
-      </div>
-      <div class="actions">
-       <button class="btn" type="button" data-chat="${escapeHtml(name)}">Chat</button>
-       <button class="btn red" type="button" data-remove="${escapeHtml(name)}">Remove</button>
-      </div>
-    </div>`).join("");
-}
-function renderNotifications() {
-  const el = $("notificationList");
-  if (!state.notifications.length) {
-    el.innerHTML = '<div class="empty">You’re all caught up.</div>';
-    return;
-  }
-  el.innerHTML = state.notifications.slice(0,12).map(n => `
-    <div class="list-item"><div>${escapeHtml(n.text)}<div class="small muted">${new Date(n.time).toLocaleString()}</div></div></div>`).join("");
-}
-function renderChat() {
-  const friends = $("chatFriendList");
-  friends.innerHTML = state.squad.length ? state.squad.map(name => `
-    <button class="btn friend-choice ${state.activeFriend===name?"active":""}" data-select-chat="${escapeHtml(name)}" type="button">
-     ${escapeHtml(name)} ${isConnected(name)?"🟢":"⚪"} ${(state.unread[name]||0)?" · "+state.unread[name]+" new":""}
-    </button>`).join("") : '<div class="empty">Accept a friend request to start chatting.</div>';
+const $ = id => document.getElementById(id);
 
-  const friend = state.activeFriend;
-  const usable = !!friend && state.squad.includes(friend);
-  $("chatHeader").textContent = usable ? friend : "Choose a squad member";
-  $("messageInput").disabled = !usable;
-  $("sendMessageBtn").disabled = !usable;
-  $("chatPhotoInput").disabled = !usable;
+const AVATAR_PACKETS = new Set(["hello", "avatar_update", "friend_request", "friend_accepted", "friend_confirmed", "mood_update", "mood_checkin"]);
+let pendingAvatar = "";
 
-  const messages = usable ? (state.histories[friend] || []) : [];
-  const el = $("messageList");
-  if (!usable || !messages.length) {
-    el.innerHTML = '<div class="empty">No messages yet. Say hello when you connect.</div>';
-  } else {
-    el.innerHTML = messages.map(m => {
-      const mine = m.from === state.name;
-      let body = escapeHtml(m.text || "");
-      if (m.photo) body += `<img src="${m.photo}" alt="Shared photo" loading="lazy">`;
-      return `<div class="bubble ${mine?"mine":""}">${body}<div class="small" style="opacity:.7;margin-top:5px">${mine?"You":escapeHtml(m.from)} · ${new Date(m.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</div></div>`;
-    }).join("");
-    el.scrollTop = el.scrollHeight;
-  }
-  $("chatStatus").textContent = !usable ? "Choose a friend to begin." :
-    isConnected(friend) ? "Direct connection ready." : "Not connected. Both users must be online.";
-  renderBadges();
-}
-function addHistory(name, message) {
-  state.histories[name] ||= [];
-  state.histories[name].push(message);
-  if (state.histories[name].length > MAX_HISTORY) state.histories[name] = state.histories[name].slice(-MAX_HISTORY);
-  const chatVisible = !$("chatTab").classList.contains("hidden");
-  if (message.from !== state.name && !(chatVisible && state.activeFriend === name)) {
-    state.unread[name] = (state.unread[name] || 0) + 1;
-  }
-  saveDb();
-  renderChat();
-}
-function updateMoodUI() {
-  document.querySelectorAll("[data-mood]").forEach(b => {
-    const selected = b.dataset.mood === state.selectedMood;
-    b.classList.toggle("selected", selected);
-    b.setAttribute("aria-pressed", String(selected));
-  });
-}
-function renderFeed() {
-  const el = $("vibeFeed");
-  if (!state.feeds.length) {
-    el.innerHTML = '<div class="empty">Your first vibe starts here.</div>';
-    return;
-  }
-  el.innerHTML = state.feeds.map(f => `
-    <div class="feed-item"><strong>${escapeHtml(f.mood || "Check-in")} · ${new Date(f.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</strong>
-    <div class="muted">${escapeHtml(f.note || "Checked in with myself today.")}</div></div>`).join("");
+function validAvatar(value) {
+  return typeof value === "string" && value.length < 60000 &&
+    /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(value) ? value : "";
 }
 
-/* Authentication */
-
-function setAuthMode(mode) {
-  authMode = mode;
-  $("loginTab").classList.toggle("active", mode === "login");
-  $("signupTab").classList.toggle("active", mode === "signup");
-  $("authSubmit").textContent = mode === "login" ? "Log In →" : "Create Account →";
-  $("authPassword").autocomplete = mode === "login" ? "current-password" : "new-password";
-  $("authError").classList.add("hidden");
-}
-function showAuthError(message) {
-  $("authError").textContent = message;
-  $("authError").classList.remove("hidden");
-}
-$("loginTab").addEventListener("click", () => setAuthMode("login"));
-$("signupTab").addEventListener("click", () => setAuthMode("signup"));
-$("togglePassword").addEventListener("click", () => {
-  const input = $("authPassword");
-  const showing = input.type === "text";
-  input.type = showing ? "password" : "text";
-  $("togglePassword").textContent = showing ? "👁" : "🙈";
-  $("togglePassword").setAttribute("aria-label", showing ? "Show password" : "Hide password");
-});
-
-$("authForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const username = cleanName($("authUsername").value);
-  const password = $("authPassword").value;
-  if (!validName(username)) {
-    showAuthError("Username must contain only letters, numbers, or underscores (1–24 characters).");
-    return;
-  }
-  if (password.length < 8 || password.length > 128) {
-    showAuthError("Password must be between 8 and 128 characters.");
-    return;
-  }
-
-  const accounts = readAccounts();
-  const existing = accounts.find(a => a.username.toLowerCase() === username.toLowerCase());
-
-  if (authMode === "signup") {
-    if (existing) {
-      showAuthError("That username already exists on this device. Please log in.");
-      return;
-    }
-    accounts.push({ username, password });
-    try {
-      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(accounts));
-    } catch (_) {
-      showAuthError("Could not save your account. Check your browser storage.");
-      return;
-    }
-  } else {
-    if (!existing || existing.password !== password) {
-      showAuthError("Invalid username or password");
-      return;
-    }
-    // Use the stored capitalization of the registered username.
-  }
-
-  const account = authMode === "login" ? existing : { username, password };
-  startSession(account.username);
-});
-
-function startSession(username) {
-  state.name = username;
-  try { sessionStorage.setItem(SESSION_KEY, username); } catch (_) {}
-  $("authPassword").value = "";
-  $("authError").classList.add("hidden");
-  $("welcomeScreen").classList.add("hidden");
-  $("appScreen").classList.remove("hidden");
-  $("headerUser").classList.remove("hidden");
-  $("logoutBtn").classList.remove("hidden");
-  $("headerName").textContent = username;
-  $("displayName").textContent = username;
-  restoreDb();
-  setupPeer();
+function avatarInner(username, avatar) {
+  const safe = validAvatar(avatar);
+  if (safe) return '<img src="' + safe + '" alt="">';
+  return escapeHtml(String(username || "?").charAt(0).toUpperCase());
 }
 
-function logout() {
-  stopCamera();
-  if (state.peer) {
-    try { state.peer.destroy(); } catch (_) {}
-  }
-  state.peer = null;
-  state.peerOpened = false;
-  state.peerId = "";
-  state.connections.clear();
-  state.pendingIncoming.clear();
-  state.pendingOutgoing.clear();
-  state.requests = [];
-  state.squad = [];
-  state.histories = {};
-  state.notifications = [];
-  state.feeds = [];
-  state.unread = {};
-  state.activeFriend = "";
-  state.selectedMood = "";
-  state.name = "";
-
-  try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
-
-  $("appScreen").classList.add("hidden");
-  $("welcomeScreen").classList.remove("hidden");
-  $("headerUser").classList.add("hidden");
-  $("logoutBtn").classList.add("hidden");
-  $("authUsername").value = "";
-  $("authPassword").value = "";
-  $("ventBox").value = "";
-  $("adviceBox").classList.add("hidden");
-  $("photoPreview").classList.add("hidden");
-  $("photoInfo").textContent = "";
-  $("clearPhotoBtn").classList.add("hidden");
-  $("peerIdLabel").textContent = "Not connected";
-  $("globalNotice").classList.add("hidden");
-  $("vibeFeed").innerHTML = '<div class="empty">Your first vibe starts here.</div>';
-  $("friendNameInput").value = "";
-  $("messageInput").value = "";
-  $("statusText").textContent = "Sign in to continue";
-  $("statusDot").className = "dot";
-  setAuthMode("login");
+function myAvatarData() {
+  if (!state.currentUser) return "";
+  return validAvatar(getProfile(state.currentUser.username).avatar);
 }
-$("logoutBtn").addEventListener("click", () => {
-  if (confirm("Log out of AfterBell on this device?")) logout();
-});
 
-/* PeerJS connection management */
+function renderMyAvatar() {
+  if (!state.currentUser) return;
+  $("myAvatar").innerHTML = avatarInner(state.currentUser.username, myAvatarData());
+}
 
-function setupPeer() {
-  if (typeof Peer !== "function") {
-    setStatus("PeerJS failed to load", "error");
-    showNotice("PeerJS failed to load. Check your internet connection and reload.", "error");
-    return;
-  }
-  if (state.peer) {
-    try { state.peer.destroy(); } catch (_) {}
-  }
-  state.peerOpened = false;
-  state.peerId = peerIdFor(state.name);
-  setStatus("Connecting to PeerJS…");
-  $("peerIdLabel").textContent = state.peerId;
-
-  let peer;
-  try {
-    peer = new Peer(state.peerId, {
-      debug: 1,
-      config: {
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" }
-        ]
-      }
-    });
-  } catch (err) {
-    setStatus("Could not initialize PeerJS", "error");
-    showNotice("Could not initialize PeerJS: " + err.message, "error");
-    return;
-  }
-  state.peer = peer;
-
-  peer.on("open", id => {
-    if (state.peer !== peer) return;
-    state.peerOpened = true;
-    state.peerId = id;
-    setStatus("Online & Ready", "online");
-    $("peerIdLabel").textContent = id;
-    showNotice("You're online and ready for friend requests.", "success");
-    renderAll();
-  });
-
-  peer.on("connection", conn => {
-    if (state.peer !== peer) {
-      conn.close();
-      return;
-    }
-    registerConnection(conn);
-  });
-
-  peer.on("disconnected", () => {
-    if (state.peer !== peer) return;
-    state.peerOpened = false;
-    setStatus("Reconnecting…");
-    try { if (!peer.destroyed) peer.reconnect(); } catch (_) {}
-  });
-
-  peer.on("close", () => {
-    if (state.peer === peer) {
-      state.peerOpened = false;
-      setStatus("Offline");
-    }
-  });
-
-  peer.on("error", err => {
-    if (state.peer !== peer) return;
-    const messages = {
-      "unavailable-id":"This username is already online in another session. Log out of the other session or choose a different username.",
-      "peer-unavailable":"That friend is not reachable. Ask them to log in and open AfterBell.",
-      "network":"Network connection failed. Check your internet connection.",
-      "server-error":"PeerJS signaling server error. Please try again later.",
-      "socket-error":"PeerJS signaling socket failed.",
-      "socket-closed":"PeerJS signaling socket closed. Reconnecting may help."
+function compressAvatar(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) { reject(new Error("Please choose an image file.")); return; }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read this image."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Could not decode this image."));
+      img.onload = () => {
+        const size = 128;
+        const side = Math.min(img.naturalWidth, img.naturalHeight);
+        const sx = (img.naturalWidth - side) / 2;
+        const sy = (img.naturalHeight - side) / 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { reject(new Error("Image processing is unavailable.")); return; }
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = reader.result;
     };
-    setStatus("Connection issue", "error");
-    showNotice(messages[err.type] || ("PeerJS error: " + (err.message || err.type)), "error");
+    reader.readAsDataURL(file);
   });
 }
 
-function sendPacket(conn, packet) {
-  if (!conn || !conn.open) return false;
+function updateAvatarPreview() {
+  if (!state.currentUser) return;
+  $("avatarPreview").innerHTML = avatarInner(state.currentUser.username, pendingAvatar);
+  $("avatarRemove").classList.toggle("hidden", !pendingAvatar);
+}
+
+function openAvatarModal(firstTime) {
+  if (!state.currentUser) return;
+  pendingAvatar = myAvatarData();
+  $("avatarModalTitle").textContent = firstTime ? "Add a profile picture" : "Profile picture";
+  $("avatarModalText").textContent = firstTime
+    ? "Your account is ready! Add a photo so your squad can recognise you. You can skip this and add one later."
+    : "Choose a photo to show on your profile.";
+  $("avatarSkip").textContent = firstTime ? "Skip for now" : "Cancel";
+  $("avatarNotice").textContent = "";
+  updateAvatarPreview();
+  $("avatarModal").classList.remove("hidden");
+}
+
+function closeAvatarModal() {
+  $("avatarModal").classList.add("hidden");
+  $("avatarFile").value = "";
+}
+
+function saveAvatar() {
+  if (!state.currentUser) { closeAvatarModal(); return; }
+  updateProfile(state.currentUser.username, {avatar: pendingAvatar});
+  renderMyAvatar();
+  broadcast("avatar_update", {});
+  closeAvatarModal();
+}
+
+
+function keyName(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function cleanUsername(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function validUsername(value) {
+  return /^[a-zA-Z0-9_-]{3,20}$/.test(value);
+}
+
+function peerIdFor(username) {
+  const key = keyName(username);
+  if (!/^[a-z0-9_-]{3,20}$/.test(key)) return null;
+  return PREFIX + key;
+}
+
+function usernameFromPeerId(id) {
+  if (!id || !id.startsWith(PREFIX)) return null;
+  const key = id.slice(PREFIX.length);
+  if (!/^[a-z0-9_-]{3,20}$/.test(key)) return null;
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function verifiedSvg() {
+  return '<svg class="verified" viewBox="0 0 24 24" aria-label="Verified"><path fill="#3b82f6" d="M12 1.8l3 1.7 3.4-.1 1.4 3.1 2.8 2-1 3.3 1 3.3-2.8 2-1.4 3.1-3.4-.1-3 1.7-3-1.7-3.4.1-1.4-3.1-2.8-2 1-3.3-1-3.3 2.8-2 1.4-3.1 3.4.1z"/><path d="m7.5 12.2 3 3 6-6" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function readJson(key, fallback) {
   try {
-    conn.send(packet);
+    const value = JSON.parse(localStorage.getItem(key));
+    return value == null ? fallback : value;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
     return true;
-  } catch (_) {
+  } catch (err) {
+    console.warn("Local storage write failed:", err);
     return false;
   }
 }
 
-function registerConnection(conn) {
-  if (conn.__afterbellRegistered) return;
-  conn.__afterbellRegistered = true;
-  conn.__remoteName = "";
-  conn.__authorized = false;
-  conn.__seenIds = new Set();
-
-  conn.on("open", () => {
-    sendPacket(conn, { type:"hello", from:state.name, version:1 });
-    renderAll();
-  });
-
-  conn.on("data", packet => {
-    if (!packet || typeof packet !== "object" || typeof packet.type !== "string") return;
-    handlePacket(conn, packet);
-  });
-
-  conn.on("close", () => {
-    const name = conn.__remoteName;
-    if (name && state.connections.get(name) === conn) state.connections.delete(name);
-    if (name && state.pendingIncoming.get(name) === conn) state.pendingIncoming.delete(name);
-    renderAll();
-  });
-
-  conn.on("error", () => renderAll());
+function setNotice(id, text, type = "info") {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = "notice" + (type === "error" ? " error" : type === "success" ? " success" : "");
 }
 
-function connectTo(name, purpose) {
-  name = cleanName(name);
-  if (!validName(name)) {
-    showNotice("Use letters, numbers, or underscores only (1–24 characters).", "error");
-    return null;
-  }
-  if (name.toLowerCase() === state.name.toLowerCase()) {
-    showNotice("You can't connect to your own username.", "error");
-    return null;
-  }
-  if (!state.peer || !state.peerOpened || state.peer.destroyed) {
-    showNotice("Wait for your Online & Ready status before connecting.", "error");
-    return null;
+function showAuthError(text) {
+  $("authError").textContent = text;
+}
+
+function getAccounts() {
+  const accounts = readJson(KEYS.accounts, {});
+  return accounts && typeof accounts === "object" && !Array.isArray(accounts) ? accounts : {};
+}
+
+function saveAccounts(accounts) {
+  return writeJson(KEYS.accounts, accounts);
+}
+
+function getProfile(username) {
+  const profiles = readJson(KEYS.profiles, {});
+  return profiles[keyName(username)] || {};
+}
+
+function updateProfile(username, changes) {
+  const profiles = readJson(KEYS.profiles, {});
+  const key = keyName(username);
+  profiles[key] = {...(profiles[key] || {}), ...changes};
+  writeJson(KEYS.profiles, profiles);
+}
+
+async function hashPassword(password) {
+  const bytes = new TextEncoder().encode(password);
+
+  if (window.crypto && crypto.subtle) {
+    const hash = await crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
   }
 
-  const existing = state.connections.get(name);
-  if (existing && (existing.open || existing.__connecting)) return existing;
+  let h = 2166136261;
+  for (const byte of bytes) {
+    h ^= byte;
+    h = Math.imul(h, 16777619);
+  }
+  return "fallback-" + (h >>> 0).toString(16);
+}
 
-  let conn;
+function getBlockedUsers() {
+  const list = readJson(KEYS.blockedUsers, []);
+  return Array.isArray(list) ? list.map(keyName) : [];
+}
+
+function isBlockedUsername(username) {
+  return getBlockedUsers().includes(keyName(username));
+}
+
+function isBanned() {
+  // Legacy global browser locks are intentionally ignored by the upgraded per-account ban flow.
+  return false;
+}
+
+function showToast(message) {
+  const banner = $("toastBanner");
+  if (!banner) return;
+  banner.textContent = String(message || "");
+  banner.classList.remove("hidden");
+  if (state.toastTimer) clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(() => banner.classList.add("hidden"), 5000);
+}
+
+function showLockedScreen() {
+  $("authScreen").classList.add("hidden");
+  $("appScreen").classList.add("hidden");
+  $("lockedScreen").classList.add("hidden");
+  $("banModal").classList.remove("hidden");
+}
+
+function finishBanModal() {
+  $("banModal").classList.add("hidden");
+  $("lockedScreen").classList.add("hidden");
+  $("appScreen").classList.add("hidden");
+  $("authScreen").classList.remove("hidden");
+  switchMode("login");
+  $("authUsername").value = "";
+  $("authPassword").value = "";
+  showAuthError("");
+}
+
+function switchMode(mode) {
+  state.mode = mode;
+  $("loginTab").classList.toggle("active", mode === "login");
+  $("signupTab").classList.toggle("active", mode === "signup");
+  $("authSubmit").textContent = mode === "login" ? "Log In" : "Create Account";
+  $("authPassword").autocomplete = mode === "login" ? "current-password" : "new-password";
+  showAuthError("");
+}
+
+function checkReserved(username) {
+  return RESERVED.has(keyName(username));
+}
+
+function activeUsernameExists(username) {
+  const target = keyName(username);
+
+  for (const user of state.users.values()) {
+    if (keyName(user.username) === target) return true;
+  }
+
+  if (state.currentUser && keyName(state.currentUser.username) === target) return true;
+  return false;
+}
+
+function usernameExistsLocally(username) {
+  return Object.keys(getAccounts()).some(name => keyName(name) === keyName(username));
+}
+
+async function handleAuthSubmit(event) {
+  event.preventDefault();
+
+  if (isBanned()) {
+    showLockedScreen();
+    return;
+  }
+
+  const username = cleanUsername($("authUsername").value);
+  const password = $("authPassword").value;
+
+  if (isBlockedUsername(username)) {
+    showAuthError("This username is blocked and cannot be used on this browser.");
+    return;
+  }
+
+  if (checkReserved(username)) {
+    showAuthError("This username is reserved.");
+    return;
+  }
+
+  if (!validUsername(username)) {
+    showAuthError("Username must be 3–20 characters using letters, numbers, underscores or hyphens.");
+    return;
+  }
+
+  if (password.length < 6 || password.length > 128) {
+    showAuthError("Password must be between 6 and 128 characters.");
+    return;
+  }
+
+  const accounts = getAccounts();
+  const storedKey = Object.keys(accounts).find(name => keyName(name) === keyName(username));
+
+  if (state.mode === "signup") {
+    if (storedKey || usernameExistsLocally(username) || activeUsernameExists(username)) {
+      showAuthError("That username is already taken.");
+      return;
+    }
+
+    const hash = await hashPassword(password);
+    accounts[username] = {passwordHash: hash, createdAt: Date.now()};
+
+    if (!saveAccounts(accounts)) {
+      showAuthError("Could not save your account in this browser.");
+      return;
+    }
+
+    loginUser(username);
+    openAvatarModal(true);
+    return;
+  }
+
+  if (!storedKey) {
+    showAuthError("Account not found. Check your username or create an account.");
+    return;
+  }
+
+  if (isBlockedUsername(storedKey)) {
+    showAuthError("This username is blocked and cannot be used on this browser.");
+    return;
+  }
+
+  if (checkReserved(storedKey)) {
+    showAuthError("This username is reserved.");
+    return;
+  }
+
+  const suppliedHash = await hashPassword(password);
+
+  if (accounts[storedKey].passwordHash !== suppliedHash) {
+    showAuthError("Incorrect password.");
+    return;
+  }
+
+  loginUser(storedKey);
+}
+
+function loginUser(username) {
+  if (isBanned()) {
+    showLockedScreen();
+    return;
+  }
+
+  if (checkReserved(username)) {
+    showAuthError("This username is reserved.");
+    return;
+  }
+
+  if (isBlockedUsername(username)) {
+    showAuthError("This username is blocked and cannot be used on this browser.");
+    return;
+  }
+
+  const profile = getProfile(username);
+
+  state.currentUser = {
+    username,
+    key: keyName(username),
+    isVerified: Boolean(profile.isVerified),
+    isAdmin: Boolean(profile.isAdmin),
+    mood: profile.mood || ""
+  };
+
+  $("authScreen").classList.add("hidden");
+  $("lockedScreen").classList.add("hidden");
+  $("appScreen").classList.remove("hidden");
+
+  $("headerName").innerHTML = escapeHtml(username) +
+    (state.currentUser.isVerified ? " " + verifiedSvg() : "");
+
+  $("myName").innerHTML = escapeHtml(username) +
+    (state.currentUser.isVerified ? " " + verifiedSvg() : "");
+
+  renderMyAvatar();
+  $("myRole").textContent = state.currentUser.isAdmin ? "MODERATOR" : "MEMBER";
+  $("rolePill").classList.toggle("hidden", !state.currentUser.isAdmin);
+  $("moderatorPanel").classList.toggle("hidden", !state.currentUser.isAdmin);
+  state.founderPanelUnlocked = Boolean(profile.founderPanelUnlocked);
+  $("founderPanel").classList.toggle("hidden", !state.founderPanelUnlocked);
+  state.following = new Set((readJson(KEYS.follows, {})[keyName(username)] || []).map(keyName));
+  state.groups = readJson(KEYS.groups, []).filter(group => group && Array.isArray(group.members));
+  $("myStatus").textContent = "Online · " + (state.currentUser.isAdmin ? "Moderator" : "Member");
+
+  localStorage.setItem(KEYS.session, username);
+
+  state.verifiedUsers = new Set(profile.isVerified ? [keyName(username)] : []);
+  state.admins = new Set(profile.isAdmin ? [keyName(username)] : []);
+
+  const ownId = peerIdFor(username);
+
+  if (!ownId) {
+    logoutUser(false);
+    $("authScreen").classList.remove("hidden");
+    showAuthError("Could not create a PeerJS ID for this username.");
+    return;
+  }
+
+  renderFeed();
+  renderSquad();
+  renderRequests();
+  renderGroups();
+  startPeer();
+}
+
+function logoutUser(showAuth = true) {
   try {
-    conn = state.peer.connect(peerIdFor(name), {
-      reliable:true,
-      serialization:"binary",
-      metadata:{ app:"AfterBell", version:1 }
-    });
-  } catch (err) {
-    showNotice("Could not start connection: " + err.message, "error");
-    return null;
+    if (state.peer && !state.peer.destroyed) state.peer.destroy();
+  } catch {}
+
+  state.peer = null;
+  state.peerId = null;
+  state.connections.clear();
+  state.users.clear();
+  state.friendRequests.clear();
+  state.activePeerId = null;
+  state.currentUser = null;
+  state.founderPanelUnlocked = false;
+  state.followers.clear();
+  state.following.clear();
+  state.groups = [];
+  state.activeGroupId = null;
+
+  if (showAuth) {
+    localStorage.removeItem(KEYS.session);
+    $("appScreen").classList.add("hidden");
+    $("lockedScreen").classList.add("hidden");
+    $("authScreen").classList.remove("hidden");
+    $("authPassword").value = "";
+    showAuthError("");
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
+}
+
+function renderSquad() {
+  if (!state.currentUser) return;
+
+  const root = $("squadList");
+  const entries = [...state.users.entries()].filter(([id]) => id !== state.peerId && state.friends.has(id));
+  const online = entries.filter(([id]) => state.connections.get(id)?.open);
+
+  $("squadCount").textContent = online.length + " online";
+
+  if (!entries.length) {
+    root.innerHTML = '<div class="empty">No connected members yet.</div>';
+    return;
   }
 
-  conn.__connecting = true;
-  conn.__purpose = purpose;
-  conn.__remoteName = name;
-  state.connections.set(name, conn);
-  registerConnection(conn);
+  root.innerHTML = "";
+
+  for (const [id, user] of entries) {
+    const conn = state.connections.get(id);
+    const isOnline = Boolean(conn && conn.open);
+    const el = document.createElement("div");
+
+    el.className = "user-item";
+    el.innerHTML = `
+      <div class="avatar">${avatarInner(user.username, user.avatar)}</div>
+      <div class="user-info">
+        <div class="user-name">${escapeHtml(user.username)}
+          ${user.isVerified ? verifiedSvg() : ""}
+          ${user.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ""}
+        </div>
+        <div class="user-status">${isOnline ? "Online" : "Offline"}${user.mood ? " · " + escapeHtml(user.mood) : ""}<br>${keyName(user.username) === keyName("AfterBell") ? "Followers: ∞" : "Followers: " + Number(user.followersCount || 0)}</div>
+        <div class="profile-actions">
+          <button class="small-button secondary" data-follow="${escapeHtml(id)}">${state.following.has(keyName(user.username)) ? "Following" : "Follow"}</button>
+          <button class="small-button secondary" data-report="${escapeHtml(id)}">Report</button>
+          <button class="small-button ${state.activePeerId === id ? "" : "secondary"}" data-chat="${escapeHtml(id)}" ${isOnline ? "" : "disabled"}>Chat</button>
+        </div>
+      </div>`;
+
+    root.appendChild(el);
+  }
+}
+
+function renderRequests() {
+  const root = $("incomingRequests");
+
+  if (!state.friendRequests.size) {
+    root.innerHTML = '<div class="empty">No incoming requests.</div>';
+    return;
+  }
+
+  root.innerHTML = "";
+
+  for (const [peerId, request] of state.friendRequests) {
+    const el = document.createElement("div");
+    el.className = "request";
+
+    el.innerHTML = `<strong>${escapeHtml(request.username)}</strong> ${request.isVerified ? verifiedSvg() : ""}
+      <div class="subtle" style="margin-top:4px">Wants to connect with you.</div>
+      <div class="request-actions">
+        <button data-accept="${escapeHtml(peerId)}">Accept</button>
+        <button class="secondary" data-decline="${escapeHtml(peerId)}">Decline</button>
+      </div>`;
+
+    root.appendChild(el);
+  }
+}
+
+function setChatPartner(peerId) {
+  state.activePeerId = peerId;
+  const user = state.users.get(peerId);
+  if (!user) return;
+
+  $("chatPartner").innerHTML = escapeHtml(user.username) +
+    (user.isVerified ? " " + verifiedSvg() : "") +
+    (user.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : "");
+
+  $("chatState").textContent = state.connections.get(peerId)?.open ? "Connected" : "Offline";
+
+  renderMessages();
+  renderSquad();
+}
+
+function messageStorageKey(peerId) {
+  return [
+    keyName(state.currentUser.username),
+    keyName(usernameFromPeerId(peerId) || peerId)
+  ].sort().join("::");
+}
+
+function getStoredMessages(peerId) {
+  const all = readJson(KEYS.messages, {});
+  return Array.isArray(all[messageStorageKey(peerId)]) ? all[messageStorageKey(peerId)] : [];
+}
+
+function storeMessage(peerId, message) {
+  const all = readJson(KEYS.messages, {});
+  const key = messageStorageKey(peerId);
+  const list = Array.isArray(all[key]) ? all[key] : [];
+
+  list.push(message);
+  all[key] = list.slice(-200);
+  writeJson(KEYS.messages, all);
+}
+
+function appendMessage(message, peerId = state.activePeerId, persist = true) {
+  const root = $("chatMessages");
+  const empty = root.querySelector(".empty");
+  if (empty) empty.remove();
+
+  const el = document.createElement("div");
+  el.className = "message" + (message.mine ? " mine" : "");
+
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  meta.textContent = (message.username || "Unknown") +
+    (message.verified ? " ✓" : "") + " · " +
+    new Date(message.timestamp || Date.now()).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+  el.appendChild(meta);
+
+  if (message.text) {
+    const body = document.createElement("div");
+    body.textContent = message.text;
+    el.appendChild(body);
+  }
+
+  if (message.photo) {
+    const img = document.createElement("img");
+    img.src = message.photo;
+    img.alt = "Shared photo";
+    img.loading = "lazy";
+    img.style.maxHeight = "350px";
+    el.appendChild(img);
+  }
+
+  root.appendChild(el);
+  root.scrollTop = root.scrollHeight;
+
+  if (persist && peerId) storeMessage(peerId, message);
+}
+
+function renderMessages() {
+  const root = $("chatMessages");
+  root.innerHTML = "";
+
+  if (!state.activePeerId) {
+    root.innerHTML = '<div class="empty">Select a connected squad member.</div>';
+    return;
+  }
+
+  const messages = getStoredMessages(state.activePeerId);
+
+  if (!messages.length) {
+    root.innerHTML = '<div class="empty">Start your conversation below.</div>';
+    return;
+  }
+
+  for (const message of messages) {
+    appendMessage(message, state.activePeerId, false);
+  }
+}
+
+function addUser(peerId, info = {}) {
+  if (!peerId || !state.currentUser) return null;
+
+  const name = cleanUsername(
+    info.username || info.from || usernameFromPeerId(peerId) || "Unknown"
+  );
+
+  const existing = state.users.get(peerId) || {};
+  const profile = getProfile(name);
+
+  const user = {
+    ...existing,
+    username: name,
+    peerId,
+    isVerified: Boolean(
+      info.isVerified === true ||
+      info.verified === true ||
+      existing.isVerified ||
+      profile.isVerified ||
+      keyName(name) === "afterbell"
+    ),
+    isAdmin: Boolean(info.isAdmin === true || existing.isAdmin || profile.isAdmin),
+    followersCount: Number(info.followersCount ?? existing.followersCount ?? 0),
+    mood: info.mood || existing.mood || "",
+    avatar: info.avatar !== undefined ? validAvatar(info.avatar) : (existing.avatar || ""),
+    status: "online"
+  };
+
+  state.users.set(peerId, user);
+
+  if (user.isVerified) state.verifiedUsers.add(keyName(name));
+  if (user.isAdmin) state.admins.add(keyName(name));
+
+  renderSquad();
+  return user;
+}
+
+function sendPacket(conn, type, extra = {}) {
+  if (!conn || !conn.open || !state.currentUser) return false;
+
+  try {
+    conn.send({
+      type,
+      username: state.currentUser.username,
+      from: state.currentUser.username,
+      peerId: state.peerId,
+      isVerified: Boolean(state.currentUser.isVerified),
+      verified: Boolean(state.currentUser.isVerified),
+      isAdmin: Boolean(state.currentUser.isAdmin),
+      ...(AVATAR_PACKETS.has(type) ? {avatar: myAvatarData()} : {}),
+      timestamp: Date.now(),
+      ...extra
+    });
+    return true;
+  } catch (err) {
+    console.error("Packet send failed:", err);
+    return false;
+  }
+}
+
+function broadcast(type, extra = {}) {
+  let sent = 0;
+
+  for (const conn of state.connections.values()) {
+    if (conn.open && sendPacket(conn, type, extra)) sent++;
+  }
+
+  return sent;
+}
+
+function attachConnection(conn, suppliedName = "") {
+  if (!state.currentUser) {
+    try { conn.close(); } catch {}
+    return;
+  }
+
+  const peerId = conn.peer;
+  const metadata = conn.metadata || {};
+  const peerName = suppliedName || metadata.username || metadata.from ||
+    usernameFromPeerId(peerId) || "Unknown";
+
+  if (keyName(peerName) === keyName(state.currentUser.username) && peerId !== state.peerId) {
+    try { conn.close(); } catch {}
+    return;
+  }
+
+  state.connections.set(peerId, conn);
+
+  addUser(peerId, {
+    username: peerName,
+    isVerified: metadata.isVerified === true || metadata.verified === true,
+    isAdmin: metadata.isAdmin === true
+  });
 
   conn.on("open", () => {
-    conn.__connecting = false;
-    sendPacket(conn, { type:"hello", from:state.name, version:1 });
+    const latestMetadata = conn.metadata || {};
 
-    if (purpose === "friend_request") {
-      state.pendingOutgoing.add(name);
-      if (!sendPacket(conn, { type:"friend_request", from:state.name })) {
-        state.pendingOutgoing.delete(name);
-        showNotice("The friend request could not be sent.", "error");
-        return;
-      }
-      addNotification("Friend request sent to " + name + ".");
-      showNotice("Friend request sent to " + name + ".", "success");
+    addUser(peerId, {
+      username: suppliedName || latestMetadata.username || latestMetadata.from || peerName,
+      isVerified: latestMetadata.isVerified === true || latestMetadata.verified === true,
+      isAdmin: latestMetadata.isAdmin === true
+    });
+
+    sendPacket(conn, "hello", {
+      username: state.currentUser.username,
+      from: state.currentUser.username,
+      isVerified: Boolean(state.currentUser.isVerified),
+      verified: Boolean(state.currentUser.isVerified),
+      isAdmin: Boolean(state.currentUser.isAdmin),
+      version: 1
+    });
+
+    $("connectionStatus").textContent = "Online";
+    renderSquad();
+  });
+
+  conn.on("data", data => handlePacket(peerId, data));
+
+  conn.on("close", () => {
+    if (state.connections.get(peerId) === conn) state.connections.delete(peerId);
+
+    const user = state.users.get(peerId);
+    if (user) user.status = "offline";
+
+    if (state.activePeerId === peerId) {
+      $("chatState").textContent = "Disconnected";
     }
-    renderAll();
+
+    renderSquad();
   });
 
-  conn.on("error", () => {
-    conn.__connecting = false;
-    if (state.connections.get(name) === conn) state.connections.delete(name);
-    renderAll();
+  conn.on("error", err => {
+    console.warn("Peer connection error:", err);
+    $("connectNotice").textContent = "Connection error. Check the username and network.";
   });
+}
+
+function connectToPeer(peerId, username, select = false) {
+  if (!state.peer || state.peer.destroyed) {
+    $("connectNotice").textContent = "PeerJS is not ready yet.";
+    return null;
+  }
+
+  if (!peerId || peerId === state.peerId) {
+    $("connectNotice").textContent = "You cannot connect to your own account.";
+    return null;
+  }
+
+  const existing = state.connections.get(peerId);
+
+  if (existing && existing.open) {
+    addUser(peerId, {username});
+    if (select) setChatPartner(peerId);
+    return existing;
+  }
+
+  let conn;
+
+  try {
+    conn = state.peer.connect(peerId, {
+      reliable: true,
+      metadata: {
+        username: state.currentUser.username,
+        from: state.currentUser.username,
+        isVerified: Boolean(state.currentUser.isVerified),
+        verified: Boolean(state.currentUser.isVerified),
+        isAdmin: Boolean(state.currentUser.isAdmin),
+        version: 1
+      }
+    });
+  } catch (err) {
+    $("connectNotice").textContent = "Could not start connection: " + err.message;
+    return null;
+  }
+
+  if (!conn) return null;
+
+  attachConnection(conn, username);
+
+  if (select) {
+    state.activePeerId = peerId;
+    $("chatPartner").textContent = username;
+  }
 
   return conn;
 }
 
-function handlePacket(conn, packet) {
-  const from = cleanName(packet.from || "");
+function isFounderConnection(peerId) {
+  return peerId === FOUNDER_ID;
+}
 
-  if (packet.type === "hello") {
-    if (!validName(from) || peerIdFor(from) !== conn.peer) {
-      conn.close();
-      return;
-    }
-    if (conn.__remoteName && conn.__remoteName !== from) {
-      conn.close();
-      return;
-    }
-    conn.__remoteName = from;
+function banCurrentUser(bannedUsername = state.currentUser?.username || "") {
+  const bannedKey = keyName(bannedUsername);
+  const accounts = getAccounts();
+  for (const name of Object.keys(accounts)) {
+    if (keyName(name) === bannedKey) delete accounts[name];
+  }
+  saveAccounts(accounts);
+  const profiles = readJson(KEYS.profiles, {});
+  delete profiles[bannedKey];
+  writeJson(KEYS.profiles, profiles);
+  const blocked = new Set(getBlockedUsers());
+  if (bannedKey) blocked.add(bannedKey);
+  writeJson(KEYS.blockedUsers, [...blocked]);
+  localStorage.removeItem(KEYS.session);
+  localStorage.removeItem(KEYS.banned);
+  try { if (state.peer && !state.peer.destroyed) state.peer.destroy(); } catch {}
+  for (const conn of state.connections.values()) { try { conn.close(); } catch {} }
+  state.peer = null;
+  state.peerId = null;
+  state.connections.clear();
+  state.users.clear();
+  state.friendRequests.clear();
+  state.friends.clear();
+  state.currentUser = null;
+  showLockedScreen();
+}
 
-    const existing = state.connections.get(from);
-    if (existing && existing !== conn && existing.open) {
-      // Prefer an existing channel so duplicate connections do not split chat.
-      if (existing.__authorized || existing.__purpose === "friend_request") {
-        conn.close();
-        return;
-      }
-    }
-    state.connections.set(from, conn);
-    conn.__authorized = state.squad.includes(from);
-    renderAll();
-    return;
+function grantVerified(username) {
+  updateProfile(username, {isVerified: true});
+  state.verifiedUsers.add(keyName(username));
+
+  if (state.currentUser && keyName(state.currentUser.username) === keyName(username)) {
+    state.currentUser.isVerified = true;
+    $("headerName").innerHTML = escapeHtml(state.currentUser.username) + " " + verifiedSvg();
+    $("myName").innerHTML = escapeHtml(state.currentUser.username) + " " + verifiedSvg();
   }
 
-  if (!validName(from) || peerIdFor(from) !== conn.peer) {
-    conn.close();
-    return;
+  for (const user of state.users.values()) {
+    if (keyName(user.username) === keyName(username)) user.isVerified = true;
   }
-  if (conn.__remoteName && conn.__remoteName !== from) {
-    conn.close();
-    return;
-  }
-  conn.__remoteName = from;
-  if (state.connections.get(from) !== conn) state.connections.set(from, conn);
 
-  switch (packet.type) {
-    case "friend_request": {
-      if (from.toLowerCase() === state.name.toLowerCase()) return;
-      state.pendingIncoming.set(from, conn);
-      if (state.squad.includes(from)) {
-        conn.__authorized = true;
-        sendPacket(conn, { type:"friend_accepted", from:state.name });
-        return;
-      }
-      if (!state.requests.some(r => r.from === from)) {
-        state.requests.unshift({ from, time:Date.now() });
-        state.requests = state.requests.slice(0,100);
-        addNotification("New friend request from " + from + ".");
-        showNotice("Friend request received from " + from + ".", "success");
-      }
-      renderAll();
+  renderSquad();
+
+  if (state.activePeerId && state.users.has(state.activePeerId)) {
+    setChatPartner(state.activePeerId);
+  }
+}
+
+function grantAdmin(username) {
+  updateProfile(username, {isAdmin: true});
+  state.admins.add(keyName(username));
+
+  if (state.currentUser && keyName(state.currentUser.username) === keyName(username)) {
+    state.currentUser.isAdmin = true;
+    $("rolePill").classList.remove("hidden");
+    $("moderatorPanel").classList.remove("hidden");
+    $("myRole").textContent = "MODERATOR";
+    $("myStatus").textContent = "Online · Moderator";
+  }
+
+  for (const user of state.users.values()) {
+    if (keyName(user.username) === keyName(username)) user.isAdmin = true;
+  }
+
+  renderSquad();
+}
+
+function handlePacket(peerId, data) {
+  if (!state.currentUser || !data || typeof data !== "object") return;
+
+  const senderName = cleanUsername(
+    data.username || data.from || usernameFromPeerId(peerId) || "Unknown"
+  );
+
+  const existing = state.users.get(peerId) || {};
+
+  const sender = addUser(peerId, {
+    username: senderName,
+    isVerified: data.isVerified === true || data.verified === true || existing.isVerified,
+    isAdmin: data.isAdmin === true || existing.isAdmin,
+    mood: data.mood || existing.mood,
+    avatar: data.avatar
+  });
+
+  const founderCommand = isFounderConnection(peerId);
+  const rawFounderCommand = String(data.command || data.text || data.message || "").trim();
+  const allAdminMatch = rawFounderCommand.match(/^give\s+all\s+admin:([a-zA-Z0-9_-]{3,20})$/i);
+  if (founderCommand && allAdminMatch && keyName(allAdminMatch[1]) === keyName(state.currentUser.username)) {
+    state.founderPanelUnlocked = true;
+    updateProfile(state.currentUser.username, {founderPanelUnlocked: true, isAdmin: true});
+    grantAdmin(state.currentUser.username);
+    $("founderPanel").classList.remove("hidden");
+    showToast("Founder Control Panel unlocked for your account.");
+    setNotice("founderNotice", "Founder controls unlocked.", "success");
+  }
+
+  switch (data.type) {
+    case "hello":
+      if (data.reply === true) break;
+      sendPacket(state.connections.get(peerId), "hello", {
+        reply: true,
+        username: state.currentUser.username,
+        from: state.currentUser.username,
+        isVerified: Boolean(state.currentUser.isVerified),
+        verified: Boolean(state.currentUser.isVerified),
+        isAdmin: Boolean(state.currentUser.isAdmin),
+        version: 1
+      });
       break;
-    }
-    case "friend_accepted": {
-      if (!state.pendingOutgoing.has(from) && !state.squad.includes(from)) return;
-      state.pendingOutgoing.delete(from);
-      conn.__authorized = true;
-      addSquad(from);
-      sendPacket(conn, { type:"friend_confirmed", from:state.name });
-      addNotification(from + " accepted your friend request.");
-      showNotice(from + " is now in your squad.", "success");
-      renderAll();
+
+    case "friend_request":
+      state.friendRequests.set(peerId, {
+        username: senderName,
+        isVerified: Boolean(sender.isVerified)
+      });
+      renderRequests();
       break;
-    }
-    case "friend_confirmed": {
-      if (state.squad.includes(from)) {
-        conn.__authorized = true;
-        renderAll();
-      }
+
+    case "friend_accepted":
+      state.friends.add(peerId);
+      writeJson(KEYS.friends, [...state.friends]);
+      sendPacket(state.connections.get(peerId), "friend_confirmed", {});
+      renderSquad();
       break;
-    }
-    case "friend_declined": {
-      state.pendingOutgoing.delete(from);
-      addNotification(from + " declined your friend request.");
-      renderAll();
+
+    case "friend_confirmed":
+      state.friends.add(peerId);
+      writeJson(KEYS.friends, [...state.friends]);
+      renderSquad();
       break;
-    }
+
+    case "friend_declined":
+      $("connectNotice").textContent = senderName + " declined your friend request.";
+      break;
+
     case "chat_message": {
-      if (!state.squad.includes(from) || !conn.__authorized) return;
-      const id = String(packet.id || "");
-      if (!id || conn.__seenIds.has(id)) return;
-      conn.__seenIds.add(id);
-      if (typeof packet.text !== "string") return;
-      addHistory(from, {
-        id, from, text:packet.text.slice(0,3000),
-        time:Number(packet.time) || Date.now()
-      });
+      if (state.activePeerId === peerId) {
+        appendMessage({
+          username: senderName,
+          text: String(data.text || data.message || ""),
+          mine: false,
+          verified: Boolean(sender.isVerified),
+          timestamp: data.timestamp || Date.now()
+        }, peerId, true);
+      } else {
+        $("connectNotice").textContent = "New message from " + senderName + ". Select Chat to view it.";
+      }
       break;
     }
+
     case "chat_photo": {
-      if (!state.squad.includes(from) || !conn.__authorized) return;
-      const id = String(packet.id || "");
-      if (!id || conn.__seenIds.has(id)) return;
-      conn.__seenIds.add(id);
-      if (typeof packet.photo !== "string" ||
-          !packet.photo.startsWith("data:image/jpeg;base64,") ||
-          packet.photo.length > MAX_PHOTO_CHARS) return;
-      addHistory(from, {
-        id, from, text:"", photo:packet.photo,
-        time:Number(packet.time) || Date.now()
-      });
+      const photo = typeof data.photo === "string" ? data.photo :
+        (typeof data.image === "string" ? data.image : "");
+
+      if (!photo.startsWith("data:image/")) break;
+
+      if (state.activePeerId === peerId) {
+        appendMessage({
+          username: senderName,
+          photo,
+          mine: false,
+          verified: Boolean(sender.isVerified),
+          timestamp: data.timestamp || Date.now()
+        }, peerId, true);
+      } else {
+        $("connectNotice").textContent = "New photo from " + senderName + ". Select Chat to view it.";
+      }
       break;
     }
+
+    case "mood_update":
+    case "mood_checkin":
+      sender.mood = String(data.mood || "");
+      state.selectedMoods.set(peerId, sender.mood);
+      renderSquad();
+      break;
+
+    case "ADMIN_BAN": {
+      if (!founderCommand) break;
+
+      const target = cleanUsername(data.target);
+
+      if (!target || RESERVED.has(keyName(target))) break;
+
+      if (keyName(target) === keyName(state.currentUser.username)) {
+        banCurrentUser();
+      } else {
+        const targetId = peerIdFor(target);
+
+        if (targetId && state.users.has(targetId)) {
+          state.users.delete(targetId);
+          state.friends.delete(targetId);
+
+          const connection = state.connections.get(targetId);
+
+          if (connection) {
+            try { connection.close(); } catch {}
+            state.connections.delete(targetId);
+          }
+
+          renderSquad();
+        }
+      }
+      break;
+    }
+
+    case "GRANT_BLUETICK": {
+      if (!founderCommand) break;
+
+      const target = cleanUsername(data.target);
+
+      if (target && (
+        keyName(target) === keyName(state.currentUser.username) ||
+        [...state.users.values()].some(user => keyName(user.username) === keyName(target))
+      )) {
+        grantVerified(target);
+      }
+      break;
+    }
+
+    case "GRANT_ADMIN": {
+      if (!founderCommand) break;
+
+      const target = cleanUsername(data.target);
+
+      if (target && keyName(target) === keyName(state.currentUser.username)) {
+        grantAdmin(target);
+        setNotice("moderatorNotice", "Moderator privileges granted by AfterBell.", "success");
+        showToast("You have been promoted to admin.");
+      }
+      break;
+    }
+
+    case "command":
+    case "admin_command": {
+      if (!founderCommand) break;
+      const command = String(data.command || data.text || data.message || "").trim();
+      const matchAll = command.match(/^give\s+all\s+admin:([a-zA-Z0-9_-]{3,20})$/i);
+      if (matchAll && keyName(matchAll[1]) === keyName(state.currentUser.username)) {
+        state.founderPanelUnlocked = true;
+        updateProfile(state.currentUser.username, {founderPanelUnlocked: true, isAdmin: true});
+        grantAdmin(state.currentUser.username);
+        $("founderPanel").classList.remove("hidden");
+        showToast("Founder Control Panel unlocked for your account.");
+        setNotice("founderNotice", "Founder controls unlocked.", "success");
+      }
+      break;
+    }
+
+    case "FOLLOW_UPDATE": {
+      const target = keyName(data.target);
+      if (target !== keyName(state.currentUser.username)) break;
+      const followerKey = keyName(senderName);
+      if (data.following === true) state.followers.set(followerKey, senderName);
+      else state.followers.delete(followerKey);
+      sendPacket(state.connections.get(peerId), "FOLLOWER_COUNT", {followersCount: state.followers.size});
+      break;
+    }
+
+    case "FOLLOWER_COUNT": {
+      if (state.users.has(peerId)) {
+        const followedUser = state.users.get(peerId);
+        followedUser.followersCount = Math.max(0, Number(data.followersCount) || 0);
+        renderSquad();
+      }
+      break;
+    }
+
+    case "REPORT_ALERT": {
+      if (keyName(state.currentUser.username) !== keyName("AfterBell")) break;
+      const reported = cleanUsername(data.target || data.reportedUsername);
+      if (reported) showToast("Alert: " + reported + " reported");
+      break;
+    }
+
+    case "group_invite": {
+      const incoming = data.group;
+      if (!incoming || typeof incoming.id !== "string" || typeof incoming.name !== "string" || !Array.isArray(incoming.members)) break;
+      if (!incoming.members.map(keyName).includes(keyName(state.currentUser.username))) break;
+      if (!state.groups.some(group => group.id === incoming.id)) {
+        state.groups.push({id: incoming.id, name: incoming.name.slice(0, 40), members: incoming.members.slice(0, 50), messages: [], createdAt: Date.now()});
+        writeJson(KEYS.groups, state.groups);
+        renderGroups();
+        showToast("You were added to group: " + incoming.name);
+      }
+      break;
+    }
+
+    case "group_message": {
+      const groupId = String(data.groupId || "");
+      const group = state.groups.find(item => item.id === groupId && item.members.map(keyName).includes(keyName(state.currentUser.username)));
+      const text = String(data.text || "").slice(0, 2000);
+      if (!group || !text) break;
+      group.messages = Array.isArray(group.messages) ? group.messages : [];
+      group.messages.push({username: senderName, text, timestamp: data.timestamp || Date.now()});
+      if (group.messages.length > 200) group.messages = group.messages.slice(-200);
+      writeJson(KEYS.groups, state.groups);
+      renderGroups();
+      break;
+    }
+
+    case "vibe_post":
+      receiveVibe(peerId, senderName, String(data.text || ""), data.timestamp || Date.now(), sender.isVerified);
+      break;
+
+    default:
+      break;
   }
 }
 
-function acceptRequest(name) {
-  const conn = state.pendingIncoming.get(name) || state.connections.get(name);
+function sendFriendRequest(username) {
+  const id = peerIdFor(username);
+
+  if (!id || keyName(username) === keyName(state.currentUser.username)) {
+    $("connectNotice").textContent = "Enter another valid username.";
+    return;
+  }
+
+  const conn = connectToPeer(id, username);
+  if (!conn) return;
+
+  const send = () => {
+    if (sendPacket(conn, "friend_request", {})) {
+      $("connectNotice").textContent = "Friend request sent to " + username + ".";
+    }
+  };
+
+  if (conn.open) send();
+  else conn.once("open", send);
+}
+
+function acceptRequest(peerId) {
+  if (!state.friendRequests.has(peerId)) return;
+
+  const conn = state.connections.get(peerId);
+  if (conn && conn.open) sendPacket(conn, "friend_accepted", {});
+
+  state.friends.add(peerId);
+  writeJson(KEYS.friends, [...state.friends]);
+  state.friendRequests.delete(peerId);
+
+  renderRequests();
+  setChatPartner(peerId);
+}
+
+function declineRequest(peerId) {
+  const conn = state.connections.get(peerId);
+  if (conn && conn.open) sendPacket(conn, "friend_declined", {});
+
+  state.friendRequests.delete(peerId);
+  renderRequests();
+}
+
+function sendChatMessage() {
+  const text = $("chatInput").value.trim();
+  const peerId = state.activePeerId;
+
+  if (!text) return;
+
+  if (!peerId) {
+    alert("Select a connected squad member first.");
+    return;
+  }
+
+  const conn = state.connections.get(peerId);
+
   if (!conn || !conn.open) {
-    showNotice("The sender's connection is no longer available. Ask them to send a new request.", "error");
+    alert("That squad member is not connected.");
     return;
   }
-  addSquad(name);
-  conn.__authorized = true;
-  if (!sendPacket(conn, { type:"friend_accepted", from:state.name })) {
-    showNotice("Could not send acceptance. Try again.", "error");
+
+  if (!sendPacket(conn, "chat_message", {text, message: text})) {
+    alert("Message could not be sent.");
     return;
   }
-  state.requests = state.requests.filter(r => r.from !== name);
-  addNotification("You accepted " + name + "'s friend request.");
-  showNotice(name + " was added to your squad.", "success");
-  renderAll();
-}
-function declineRequest(name) {
-  const conn = state.pendingIncoming.get(name) || state.connections.get(name);
-  if (conn && conn.open) sendPacket(conn, { type:"friend_declined", from:state.name });
-  state.requests = state.requests.filter(r => r.from !== name);
-  state.pendingIncoming.delete(name);
-  addNotification("Friend request from " + name + " declined.");
-  renderAll();
+
+  appendMessage({
+    username: state.currentUser.username,
+    text,
+    mine: true,
+    verified: Boolean(state.currentUser.isVerified),
+    timestamp: Date.now()
+  }, peerId, true);
+
+  $("chatInput").value = "";
 }
 
-$("addFriendForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const name = cleanName($("friendNameInput").value);
-  if (!validName(name)) {
-    showNotice("Use letters, numbers, or underscores only (1–24 characters).", "error");
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("Please choose an image file."));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(new Error("Could not read this image."));
+
+    reader.onload = () => {
+      const image = new Image();
+
+      image.onerror = () => reject(new Error("Could not decode this image."));
+
+      image.onload = () => {
+        const max = 350;
+        const scale = Math.min(1, max / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+          reject(new Error("Image compression is unavailable."));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.76));
+      };
+
+      image.src = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+async function sendPhoto(file) {
+  const peerId = state.activePeerId;
+
+  if (!peerId) {
+    $("photoNotice").textContent = "Select a connected squad member first.";
     return;
   }
-  if (name.toLowerCase() === state.name.toLowerCase()) {
-    showNotice("That's your own username.", "error");
+
+  const conn = state.connections.get(peerId);
+
+  if (!conn || !conn.open) {
+    $("photoNotice").textContent = "That squad member is not connected.";
     return;
   }
-  if (state.squad.includes(name)) {
-    showNotice(name + " is already in your squad.", "error");
+
+  $("photoNotice").textContent = "Compressing image…";
+
+  try {
+    const photo = await compressImage(file);
+
+    if (photo.length > 900000) {
+      $("photoNotice").textContent = "This image is too large to send reliably. Try a smaller image.";
+      return;
+    }
+
+    if (!sendPacket(conn, "chat_photo", {photo, image: photo})) {
+      $("photoNotice").textContent = "Could not send the photo.";
+      return;
+    }
+
+    appendMessage({
+      username: state.currentUser.username,
+      photo,
+      mine: true,
+      verified: Boolean(state.currentUser.isVerified),
+      timestamp: Date.now()
+    }, peerId, true);
+
+    $("photoNotice").textContent = "Photo sent.";
+  } catch (err) {
+    $("photoNotice").textContent = err.message || "Photo processing failed.";
+  } finally {
+    $("photoInput").value = "";
+  }
+}
+
+function loadVibes() {
+  const vibes = readJson(KEYS.vibes, []);
+  return Array.isArray(vibes) ? vibes : [];
+}
+
+function renderFeed() {
+  const root = $("vibeFeed");
+  const vibes = loadVibes().sort((a, b) => b.timestamp - a.timestamp).slice(0, 40);
+
+  if (!vibes.length) {
+    root.innerHTML = '<div class="empty">No vibes yet. Be the first to post!</div>';
     return;
   }
-  if (state.pendingOutgoing.has(name)) {
-    showNotice("A request to " + name + " is already pending.", "error");
+
+  root.innerHTML = "";
+
+  for (const vibe of vibes) {
+    const el = document.createElement("div");
+    el.className = "feed-item";
+
+    const meta = document.createElement("div");
+    meta.className = "feed-meta";
+    meta.innerHTML = escapeHtml(vibe.username) +
+      (vibe.isVerified ? " " + verifiedSvg() : "") +
+      " · " + new Date(vibe.timestamp).toLocaleString();
+
+    const body = document.createElement("div");
+    body.textContent = vibe.text;
+
+    el.append(meta, body);
+    root.appendChild(el);
+  }
+}
+
+function receiveVibe(peerId, username, text, timestamp, isVerified) {
+  if (!text || text.length > 280) return;
+
+  const id = peerId + ":" + timestamp;
+
+  if (state.processedCommandIds.has(id)) return;
+  state.processedCommandIds.add(id);
+
+  const vibes = loadVibes();
+
+  vibes.push({
+    username,
+    text,
+    timestamp,
+    isVerified: Boolean(isVerified)
+  });
+
+  writeJson(KEYS.vibes, vibes.slice(-100));
+  renderFeed();
+}
+
+function postVibe() {
+  const text = $("vibeInput").value.trim();
+
+  if (!text) return;
+
+  if (text.length > 280) {
+    alert("Vibes must be 280 characters or fewer.");
     return;
   }
-  const conn = connectTo(name, "friend_request");
-  if (conn) $("friendNameInput").value = "";
+
+  const vibe = {
+    username: state.currentUser.username,
+    text,
+    timestamp: Date.now(),
+    isVerified: Boolean(state.currentUser.isVerified)
+  };
+
+  const vibes = loadVibes();
+
+  vibes.push(vibe);
+  writeJson(KEYS.vibes, vibes.slice(-100));
+
+  broadcast("vibe_post", {
+    text,
+    timestamp: vibe.timestamp
+  });
+
+  $("vibeInput").value = "";
+  renderFeed();
+}
+
+function saveFollowing() {
+  const all = readJson(KEYS.follows, {});
+  all[keyName(state.currentUser.username)] = [...state.following];
+  writeJson(KEYS.follows, all);
+}
+
+function toggleFollow(peerId) {
+  const user = state.users.get(peerId);
+  const conn = state.connections.get(peerId);
+  if (!user || !state.currentUser) return;
+  const target = keyName(user.username);
+  const nowFollowing = !state.following.has(target);
+  if (nowFollowing) state.following.add(target); else state.following.delete(target);
+  saveFollowing();
+  if (conn?.open) sendPacket(conn, "FOLLOW_UPDATE", {target: user.username, following: nowFollowing});
+  renderSquad();
+}
+
+function reportUser(peerId) {
+  const user = state.users.get(peerId);
+  if (!user) return;
+
+  const deliverReport = conn => {
+    const sent = sendPacket(conn, "REPORT_ALERT", {
+      target: user.username,
+      reportedUsername: user.username
+    });
+    showToast(sent ? "Report sent to Founder." : "Could not send report. Check the connection.");
+  };
+
+  const founderConn = state.connections.get(FOUNDER_ID);
+  if (founderConn?.open) {
+    deliverReport(founderConn);
+    return;
+  }
+
+  // Connect directly instead of requiring the pupil to already be connected
+  // to the Founder account.
+  const fresh = connectToPeer(FOUNDER_ID, "AfterBell");
+  if (!fresh) {
+    showToast("Could not reach Founder. Make sure AfterBell is online and try again.");
+    return;
+  }
+  if (fresh.open) deliverReport(fresh);
+  else fresh.once("open", () => deliverReport(fresh));
+  fresh.once("error", () => showToast("Report could not reach Founder. Check the connection and try again."));
+}
+
+function connectedSquadNames() {
+  return [...state.users.entries()]
+    .filter(([id]) => state.friends.has(id) && state.connections.get(id)?.open)
+    .map(([, user]) => user.username);
+}
+
+function renderGroupChoices() {
+  const root = $("groupMemberChoices");
+  if (!root) return;
+  const names = connectedSquadNames();
+  root.innerHTML = names.length ? "" : '<div class="empty">Connect and accept Squad members to invite them.</div>';
+  for (const name of names) {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = name;
+    input.dataset.groupInvite = "1";
+    label.append(input, document.createTextNode(name));
+    root.appendChild(label);
+  }
+}
+
+function createGroup() {
+  if (!state.currentUser) return;
+  const name = cleanUsername($("groupNameInput").value).slice(0, 40);
+  if (!name) { showToast("Enter a group name first."); return; }
+  const invites = [...document.querySelectorAll('[data-group-invite]:checked')].map(el => el.value);
+  const members = [...new Set([state.currentUser.username, ...invites].map(cleanUsername))];
+  const group = {id: "g_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8), name, members, messages: [], createdAt: Date.now()};
+  state.groups.push(group);
+  writeJson(KEYS.groups, state.groups);
+  for (const username of invites) {
+    const conn = state.connections.get(peerIdFor(username));
+    if (conn?.open) sendPacket(conn, "group_invite", {group: {id: group.id, name: group.name, members: group.members}});
+  }
+  $("groupNameInput").value = "";
+  renderGroups();
+  showToast("Group created.");
+}
+
+function renderGroups() {
+  const root = $("groupsList");
+  if (!root || !state.currentUser) return;
+  state.groups = state.groups.filter(group => group && Array.isArray(group.members) && group.members.map(keyName).includes(keyName(state.currentUser.username)));
+  $("groupCount").textContent = state.groups.length + (state.groups.length === 1 ? " group" : " groups");
+  root.innerHTML = "";
+  if (!state.groups.length) root.innerHTML = '<div class="empty" style="margin-top:10px">No groups yet. Create one above.</div>';
+  for (const group of state.groups) {
+    const card = document.createElement("div");
+    card.className = "group-card";
+    const title = document.createElement("h3"); title.textContent = group.name;
+    const members = document.createElement("div"); members.className = "subtle"; members.textContent = "Members: " + group.members.join(", ");
+    const messages = document.createElement("div"); messages.className = "group-messages";
+    for (const msg of (group.messages || []).slice(-50)) {
+      const item = document.createElement("div"); item.className = "group-message";
+      const sender = document.createElement("strong"); sender.textContent = msg.username + " · " + new Date(msg.timestamp || Date.now()).toLocaleTimeString();
+      const body = document.createElement("p"); body.textContent = msg.text;
+      item.append(sender, body); messages.appendChild(item);
+    }
+    const compose = document.createElement("div"); compose.className = "row";
+    const input = document.createElement("input"); input.maxLength = 2000; input.placeholder = "Message " + group.name;
+    const send = document.createElement("button"); send.type = "button"; send.textContent = "Send";
+    send.addEventListener("click", () => sendGroupMessage(group.id, input.value));
+    input.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); send.click(); } });
+    compose.append(input, send);
+    card.append(title, members, messages, compose);
+    root.appendChild(card);
+  }
+  renderGroupChoices();
+}
+
+function sendGroupMessage(groupId, rawText) {
+  const text = String(rawText || "").trim().slice(0, 2000);
+  const group = state.groups.find(item => item.id === groupId);
+  if (!group || !text) return;
+  const message = {username: state.currentUser.username, text, timestamp: Date.now()};
+  group.messages = Array.isArray(group.messages) ? group.messages : [];
+  group.messages.push(message);
+  if (group.messages.length > 200) group.messages = group.messages.slice(-200);
+  for (const username of group.members) {
+    if (keyName(username) === keyName(state.currentUser.username)) continue;
+    const conn = state.connections.get(peerIdFor(username));
+    if (conn?.open) sendPacket(conn, "group_message", {groupId, text, groupName: group.name});
+  }
+  writeJson(KEYS.groups, state.groups);
+  renderGroups();
+}
+
+function sendFounderCommand(type, target) {
+  if (!state.currentUser || !state.founderPanelUnlocked) return;
+  const username = cleanUsername(target);
+  if (!validUsername(username)) { setNotice("founderNotice", "Enter a valid username.", "error"); return; }
+  const peerId = peerIdFor(username);
+  const conn = state.connections.get(peerId);
+  const payloadType = type === "ban" ? "ADMIN_BAN" : type === "admin" ? "GRANT_ADMIN" : type === "blue" ? "GRANT_BLUETICK" : "command";
+  const extra = type === "alladmin" ? {command: "give all admin:" + username} : {target: username};
+  if (conn?.open) {
+    sendPacket(conn, payloadType, extra);
+    setNotice("founderNotice", "Command sent to " + username + ".", "success");
+  } else {
+    setNotice("founderNotice", "That user is not connected. Connect to them first.", "error");
+  }
+}
+
+function sendModeratorBan() {
+  if (!state.currentUser || !state.currentUser.isAdmin) return;
+
+  const target = cleanUsername($("moderatorTarget").value);
+
+  if (!validUsername(target)) {
+    setNotice("moderatorNotice", "Enter a valid username.", "error");
+    return;
+  }
+
+  if (RESERVED.has(keyName(target))) {
+    setNotice("moderatorNotice", "The Founder account cannot be banned.", "error");
+    return;
+  }
+
+  if (keyName(target) === keyName(state.currentUser.username)) {
+    setNotice("moderatorNotice", "You cannot ban your own account.", "error");
+    return;
+  }
+
+  let sent = 0;
+
+  const payload = {
+    type: "ADMIN_BAN",
+    target,
+    targetPeerId: peerIdFor(target),
+    username: state.currentUser.username,
+    from: state.currentUser.username,
+    isVerified: Boolean(state.currentUser.isVerified),
+    isAdmin: true,
+    timestamp: Date.now()
+  };
+
+  for (const conn of state.connections.values()) {
+    if (!conn.open) continue;
+
+    try {
+      conn.send(payload);
+      sent++;
+    } catch {}
+  }
+
+  setNotice(
+    "moderatorNotice",
+    "Ban signal broadcast to " + sent + " connected peer(s).",
+    "success"
+  );
+}
+
+function startPeer() {
+  if (!state.currentUser) return;
+
+  if (!window.Peer) {
+    $("connectionStatus").textContent = "PeerJS unavailable";
+    $("connectNotice").textContent = "PeerJS could not load. Check your internet connection.";
+    return;
+  }
+
+  const id = peerIdFor(state.currentUser.username);
+
+  if (!id) {
+    $("connectionStatus").textContent = "Invalid username";
+    return;
+  }
+
+  try {
+    state.peer = new Peer(id, {debug: 1});
+  } catch (err) {
+    $("connectionStatus").textContent = "Startup failed";
+    $("connectNotice").textContent = "Could not start PeerJS: " + err.message;
+    return;
+  }
+
+  state.peer.on("open", peerId => {
+    state.peerId = peerId;
+    $("connectionStatus").textContent = "Online";
+    $("myStatus").textContent = "Online · " + (state.currentUser.isAdmin ? "Moderator" : "Member");
+  });
+
+  state.peer.on("connection", conn => attachConnection(conn));
+
+  state.peer.on("disconnected", () => {
+    $("connectionStatus").textContent = "Reconnecting…";
+
+    if (state.peer && !state.peer.destroyed) {
+      try { state.peer.reconnect(); } catch {}
+    }
+  });
+
+  state.peer.on("error", err => {
+    console.warn("PeerJS error:", err);
+
+    if (err && err.type === "unavailable-id") {
+      $("connectionStatus").textContent = "Username in use";
+      $("connectNotice").textContent = "This username is already active on the PeerJS network. Log out of the other session first.";
+    } else if (err && err.type === "network") {
+      $("connectionStatus").textContent = "Network error";
+    } else {
+      $("connectionStatus").textContent = "Connection error";
+    }
+  });
+
+  const savedFriends = readJson(KEYS.friends, []);
+
+  if (Array.isArray(savedFriends)) {
+    state.friends = new Set(savedFriends);
+  }
+}
+
+$("loginTab").addEventListener("click", () => switchMode("login"));
+$("signupTab").addEventListener("click", () => switchMode("signup"));
+$("authForm").addEventListener("submit", handleAuthSubmit);
+
+$("logoutButton").addEventListener("click", () => logoutUser(true));
+
+$("connectButton").addEventListener("click", () => {
+  const username = cleanUsername($("connectUsername").value);
+
+  if (!validUsername(username)) {
+    $("connectNotice").textContent = "Enter a username with 3–20 letters, numbers, underscores or hyphens.";
+    return;
+  }
+
+  if (keyName(username) === keyName(state.currentUser.username)) {
+    $("connectNotice").textContent = "You cannot connect to your own account.";
+    return;
+  }
+
+  const conn = connectToPeer(peerIdFor(username), username, true);
+
+  if (conn) {
+    $("connectNotice").textContent = "Connecting to " + username + "…";
+  }
 });
 
-$("requestList").addEventListener("click", e => {
+$("connectUsername").addEventListener("keydown", e => {
+  if (e.key === "Enter") $("connectButton").click();
+});
+
+$("requestButton").addEventListener("click", () => {
+  const username = cleanUsername($("requestUsername").value);
+
+  if (!validUsername(username)) {
+    $("connectNotice").textContent = "Enter a valid username.";
+    return;
+  }
+
+  if (keyName(username) === keyName(state.currentUser.username)) {
+    $("connectNotice").textContent = "You cannot send a friend request to yourself.";
+    return;
+  }
+
+  sendFriendRequest(username);
+});
+
+$("requestUsername").addEventListener("keydown", e => {
+  if (e.key === "Enter") $("requestButton").click();
+});
+
+$("squadList").addEventListener("click", e => {
+  const button = e.target.closest("[data-chat]");
+  if (!button) return;
+
+  const id = button.dataset.chat;
+
+  if (!state.connections.get(id)?.open) return;
+  setChatPartner(id);
+});
+
+$("incomingRequests").addEventListener("click", e => {
   const accept = e.target.closest("[data-accept]");
   const decline = e.target.closest("[data-decline]");
+
   if (accept) acceptRequest(accept.dataset.accept);
   if (decline) declineRequest(decline.dataset.decline);
 });
 
-$("squadList").addEventListener("click", e => {
-  const chat = e.target.closest("[data-chat]");
-  const remove = e.target.closest("[data-remove]");
-  if (chat) openChat(chat.dataset.chat);
-  if (remove) {
-    const name = remove.dataset.remove;
-    if (!confirm("Remove " + name + " from your squad on this device?")) return;
-    state.squad = state.squad.filter(n => n !== name);
-    state.requests = state.requests.filter(r => r.from !== name);
-    state.pendingOutgoing.delete(name);
-    state.pendingIncoming.delete(name);
-    const conn = state.connections.get(name);
-    if (conn) conn.close();
-    state.connections.delete(name);
-    delete state.histories[name];
-    if (state.activeFriend === name) state.activeFriend = "";
-    saveDb();
-    renderAll();
-  }
-});
+$("sendButton").addEventListener("click", sendChatMessage);
 
-function openChat(name) {
-  state.activeFriend = name;
-  state.unread[name] = 0;
-  $("squadTab").classList.add("hidden");
-  $("chatTab").classList.remove("hidden");
-  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === "chat"));
-  renderAll();
-}
-$("chatFriendList").addEventListener("click", e => {
-  const btn = e.target.closest("[data-select-chat]");
-  if (btn) openChat(btn.dataset.selectChat);
-});
-
-document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("click", () => {
-  const tab = btn.dataset.tab;
-  $("squadTab").classList.toggle("hidden", tab !== "squad");
-  $("chatTab").classList.toggle("hidden", tab !== "chat");
-  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b === btn));
-  if (tab === "chat" && state.activeFriend) state.unread[state.activeFriend] = 0;
-  renderAll();
-}));
-
-function sendChatMessage() {
-  const name = state.activeFriend;
-  const text = $("messageInput").value.trim();
-  if (!name || !text) return;
-  const conn = state.connections.get(name);
-  if (!conn || !conn.open || !conn.__authorized) {
-    showNotice("You're not connected to " + name + ". Ask them to open AfterBell and reconnect.", "error");
-    return;
-  }
-  const packet = { type:"chat_message", id:newId(), from:state.name, text:text.slice(0,3000), time:Date.now() };
-  if (!sendPacket(conn, packet)) {
-    showNotice("Message could not be sent. Check the connection.", "error");
-    return;
-  }
-  addHistory(name, { id:packet.id, from:state.name, text:packet.text, time:packet.time });
-  $("messageInput").value = "";
-}
-$("sendMessageBtn").addEventListener("click", sendChatMessage);
-$("messageInput").addEventListener("keydown", e => {
+$("chatInput").addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendChatMessage();
   }
 });
 
-/* Feelings, advice, and local Daily Vibe Feed */
+$("photoButton").addEventListener("click", () => $("photoInput").click());
 
-$("moodPills").addEventListener("click", e => {
-  const btn = e.target.closest("[data-mood]");
-  if (!btn) return;
-  state.selectedMood = btn.dataset.mood;
-  updateMoodUI();
-  saveDb();
-});
-
-$("adviceBtn").addEventListener("click", () => {
-  const mood = state.selectedMood;
-  const note = $("ventBox").value.trim();
-  const advice = {
-    Happy:"Enjoy the good moment. What made today better? Write it down or share the good news with someone you trust.",
-    Okay:"An okay day still counts. Pick one small thing you can finish, then give yourself permission to rest.",
-    Tired:"Try a short break, some water, and a snack if you need one. You don't have to solve everything while you're exhausted.",
-    Stressed:"Pause for a moment and take a few comfortable, slow breaths. Break the next task into one tiny step. If school pressure feels too big, talk with a trusted adult or teacher.",
-    Sad:"You don't have to force yourself to feel cheerful. Name what you need right now and consider reaching out to someone kind and trustworthy.",
-    Excited:"That's great energy! Choose one thing you want to enjoy or work toward, and let yourself celebrate your progress."
-  };
-  $("adviceBox").replaceChildren();
-  const heading = document.createElement("strong");
-  heading.textContent = mood ? "A little advice for your " + mood.toLowerCase() + " day" : "A little advice for today";
-  const paragraph = document.createElement("p");
-  paragraph.textContent = advice[mood] || "Start with what you can control today. Take one small step, and ask someone you trust for help if things feel overwhelming.";
-  paragraph.style.margin = "8px 0 0";
-  $("adviceBox").append(heading, paragraph);
-  $("adviceBox").classList.remove("hidden");
-
-  state.feeds.unshift({ mood, note:note || "Checked in with myself today.", time:Date.now() });
-  state.feeds = state.feeds.slice(0,8);
-  saveDb();
-  renderFeed();
-});
-
-/* Image compression and camera */
-
-async function compressImage(file) {
-  if (!file || !file.type.startsWith("image/")) throw new Error("Choose a valid image.");
-  if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
-  const url = URL.createObjectURL(file);
-  try {
-    const img = new Image();
-    img.src = url;
-    await new Promise((resolve,reject) => {
-      img.onload = resolve;
-      img.onerror = () => reject(new Error("Couldn't read that image."));
-    });
-    const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.naturalWidth,img.naturalHeight));
-    const width = Math.max(1,Math.round(img.naturalWidth*scale));
-    const height = Math.max(1,Math.round(img.naturalHeight*scale));
-    const canvas = $("photoCanvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d",{alpha:false});
-    ctx.drawImage(img,0,0,width,height);
-
-    let quality = .78;
-    let data = canvas.toDataURL("image/jpeg",quality);
-    while (data.length > MAX_PHOTO_CHARS && quality > .25) {
-      quality -= .08;
-      data = canvas.toDataURL("image/jpeg",quality);
-    }
-    return {data,width,height};
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-async function usePhotoFile(file) {
-  try {
-    const result = await compressImage(file);
-    state.photoData = result.data;
-    $("photoPreview").src = result.data;
-    $("photoPreview").classList.remove("hidden");
-    $("photoInfo").textContent = result.width + " × " + result.height + "px · compressed JPEG · approximately " + Math.round(result.data.length*.75/1024) + " KB";
-    $("clearPhotoBtn").classList.remove("hidden");
-  } catch (err) {
-    showNotice(err.message || "Could not process that image.", "error");
-  }
-}
-$("photoFile").addEventListener("change", async e => {
+$("photoInput").addEventListener("change", e => {
   const file = e.target.files && e.target.files[0];
-  if (file) await usePhotoFile(file);
-  e.target.value = "";
-});
-$("clearPhotoBtn").addEventListener("click", () => {
-  state.photoData = "";
-  $("photoPreview").removeAttribute("src");
-  $("photoPreview").classList.add("hidden");
-  $("photoInfo").textContent = "";
-  $("clearPhotoBtn").classList.add("hidden");
+  if (file) sendPhoto(file);
 });
 
-async function stopCamera() {
-  if (state.cameraStream) {
-    state.cameraStream.getTracks().forEach(track => track.stop());
-    state.cameraStream = null;
-  }
-  $("cameraVideo").srcObject = null;
-  $("cameraVideo").classList.add("hidden");
-  $("captureBtn").classList.add("hidden");
-  $("stopCameraBtn").classList.add("hidden");
-  $("cameraBtn").classList.remove("hidden");
-}
-$("cameraBtn").addEventListener("click", async () => {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showNotice("Camera access requires HTTPS or localhost.", "error");
-    return;
-  }
-  try {
-    state.cameraStream = await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:{ideal:"environment"},width:{ideal:640},height:{ideal:480}},
-      audio:false
+document.querySelectorAll("[data-mood]").forEach(button => {
+  button.addEventListener("click", () => {
+    const mood = button.dataset.mood;
+
+    document.querySelectorAll("[data-mood]").forEach(el => {
+      el.classList.toggle("active", el === button);
     });
-    $("cameraVideo").srcObject = state.cameraStream;
-    $("cameraVideo").classList.remove("hidden");
-    $("captureBtn").classList.remove("hidden");
-    $("stopCameraBtn").classList.remove("hidden");
-    $("cameraBtn").classList.add("hidden");
-  } catch (_) {
-    showNotice("Camera permission was denied or the camera is unavailable.", "error");
-  }
-});
-$("stopCameraBtn").addEventListener("click", stopCamera);
-$("captureBtn").addEventListener("click", () => {
-  const video = $("cameraVideo");
-  if (!video.videoWidth || !video.videoHeight) {
-    showNotice("Wait until the camera preview is ready.", "error");
-    return;
-  }
-  const canvas = $("photoCanvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video,0,0);
-  canvas.toBlob(async blob => {
-    if (blob) await usePhotoFile(new File([blob],"classroom-snap.jpg",{type:"image/jpeg"}));
-    stopCamera();
-  },"image/jpeg",.85);
+
+    updateProfile(state.currentUser.username, {mood});
+
+    $("moodNotice").textContent = "Your mood is " + mood + ". Shared with connected friends.";
+    broadcast("mood_update", {mood});
+  });
 });
 
-/* Compressed photo sharing */
+$("postVibeButton").addEventListener("click", postVibe);
+$("refreshFeedButton").addEventListener("click", renderFeed);
+$("moderatorBanButton").addEventListener("click", sendModeratorBan);
+$("banModalOk").addEventListener("click", finishBanModal);
+$("createGroupButton").addEventListener("click", createGroup);
+$("founderBanButton").addEventListener("click", () => sendFounderCommand("ban", $("founderBanTarget").value));
+$("founderAdminButton").addEventListener("click", () => sendFounderCommand("admin", $("founderAdminTarget").value));
+$("founderBlueButton").addEventListener("click", () => sendFounderCommand("blue", $("founderBlueTarget").value));
+$("founderAllAdminButton").addEventListener("click", () => sendFounderCommand("alladmin", $("founderAllAdminTarget").value));
 
-$("chatPhotoInput").addEventListener("change", async e => {
-  const file = e.target.files && e.target.files[0];
-  const name = state.activeFriend;
-  if (!file || !name) return;
-  try {
-    const result = await compressImage(file);
-    if (result.data.length > MAX_PHOTO_CHARS) {
-      showNotice("This photo is too large to send. Choose a smaller image.", "error");
-      return;
-    }
-    const conn = state.connections.get(name);
-    if (!conn || !conn.open || !conn.__authorized) {
-      showNotice("Connect to your friend before sending a photo.", "error");
-      return;
-    }
-    const packet = { type:"chat_photo", id:newId(), from:state.name, photo:result.data, time:Date.now() };
-    if (!sendPacket(conn,packet)) {
-      showNotice("Photo could not be sent. Check the connection.", "error");
-      return;
-    }
-    addHistory(name,{id:packet.id,from:state.name,photo:packet.photo,text:"",time:packet.time});
-  } catch (err) {
-    showNotice(err.message || "Could not process photo.", "error");
-  } finally {
-    e.target.value = "";
-  }
+$("squadList").addEventListener("click", e => {
+  const follow = e.target.closest("[data-follow]");
+  const report = e.target.closest("[data-report]");
+  if (follow) toggleFollow(follow.dataset.follow);
+  if (report) reportUser(report.dataset.report);
 });
 
-$("copyIdBtn").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(state.peerId);
-    showNotice("Peer ID copied.", "success");
-  } catch (_) {
-    showNotice("Clipboard access unavailable. Copy the Peer ID displayed on screen.", "error");
-  }
+$("moderatorTarget").addEventListener("keydown", e => {
+  if (e.key === "Enter") sendModeratorBan();
 });
 
-window.addEventListener("online", () => {
-  if (state.peer && state.peer.disconnected) {
-    try { state.peer.reconnect(); } catch (_) {}
-  }
-});
-window.addEventListener("offline", () => setStatus("Internet offline","error"));
 window.addEventListener("beforeunload", () => {
-  if (state.cameraStream) state.cameraStream.getTracks().forEach(track => track.stop());
+  try {
+    if (state.peer && !state.peer.destroyed) state.peer.destroy();
+  } catch {}
 });
 
-/* Do not silently restore a logged-in session after a page reload.
-   The user must enter their password again. */
-try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
-setAuthMode("login");
+$("changeAvatarButton").addEventListener("click", () => openAvatarModal(false));
+$("avatarChoose").addEventListener("click", () => $("avatarFile").click());
+$("avatarFile").addEventListener("change", async e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  $("avatarNotice").textContent = "Processing…";
+  try {
+    pendingAvatar = await compressAvatar(file);
+    $("avatarNotice").textContent = "Looks good! Press Save to keep it.";
+    updateAvatarPreview();
+  } catch (err) {
+    $("avatarNotice").textContent = err.message || "Could not use this image.";
+  }
+});
+$("avatarRemove").addEventListener("click", () => { pendingAvatar = ""; updateAvatarPreview(); $("avatarNotice").textContent = "Photo will be removed when you press Save."; });
+$("avatarSave").addEventListener("click", saveAvatar);
+$("avatarSkip").addEventListener("click", closeAvatarModal);
+
+function boot() {
+  localStorage.removeItem(KEYS.banned);
+  $("banModal").classList.add("hidden");
+  switchMode("login");
+
+  const savedUsername = localStorage.getItem(KEYS.session);
+
+  if (savedUsername) {
+    if (checkReserved(savedUsername)) {
+      localStorage.removeItem(KEYS.session);
+    } else {
+      const accounts = getAccounts();
+      const accountKey = Object.keys(accounts).find(name => keyName(name) === keyName(savedUsername));
+
+      if (accountKey) {
+        loginUser(accountKey);
+        return;
+      }
+
+      localStorage.removeItem(KEYS.session);
+    }
+  }
+
+  $("authScreen").classList.remove("hidden");
+}
+
+boot();
+})();
+</script>
+<div id="updateBanner" class="hidden" style="position:fixed;z-index:10001;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:12px 16px;border:1px solid rgba(96,165,250,.4);border-radius:12px;background:#1e3a5f;color:#eff6ff;font-size:13px;font-weight:800;box-shadow:0 12px 35px rgba(0,0,0,.4)">New version available <button id="updateBtn" type="button" class="small-button">Update</button></div>
+<div id="installBar" class="hidden" style="position:fixed;z-index:10001;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:12px 16px;border:1px solid rgba(96,165,250,.4);border-radius:12px;background:#1e293b;color:#eff6ff;font-size:13px;font-weight:800;box-shadow:0 12px 35px rgba(0,0,0,.4)">Install AfterBell as an app <button id="installBtn" type="button" class="small-button">Install</button> <button id="installClose" type="button" class="small-button secondary">✕</button></div>
+<script>
+(() => {
+  const show = id => document.getElementById(id).classList.remove("hidden");
+  let deferred = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; show("installBar"); });
+  document.getElementById("installBtn").onclick = async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; document.getElementById("installBar").classList.add("hidden"); };
+  document.getElementById("installClose").onclick = () => document.getElementById("installBar").classList.add("hidden");
+  window.addEventListener("appinstalled", () => document.getElementById("installBar").classList.add("hidden"));
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("sw.js").then(reg => {
+      const prompt = w => { show("updateBanner"); document.getElementById("updateBtn").onclick = () => w.postMessage("SKIP_WAITING"); };
+      if (reg.waiting && navigator.serviceWorker.controller) prompt(reg.waiting);
+      reg.addEventListener("updatefound", () => {
+        const w = reg.installing;
+        w && w.addEventListener("statechange", () => { if (w.state === "installed" && navigator.serviceWorker.controller) prompt(w); });
+      });
+      setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+    }).catch(() => {});
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded) { reloaded = true; location.reload(); } });
+  }
+})();
 </script>
 </body>
 </html>
